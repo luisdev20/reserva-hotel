@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 16" preserveAspectRatio="none">
+  <defs>
+    <pattern id="textile" width="24" height="16" patternUnits="userSpaceOnUse">
+      <rect width="24" height="16" fill="none"/>
+      <path d="M12 1 L20 8 L12 15 L4 8 Z" fill="none" stroke="#C9A66B" stroke-width="1.4"/>
+      <rect x="10.5" y="6.5" width="3" height="3" fill="#6E2A2E"/>
+    </pattern>
+  </defs>
+  <rect width="240" height="16" fill="url(#textile)"/>
+</svg>

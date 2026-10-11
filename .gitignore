@@ -1,9 +1,15 @@
 HELP.md
-EXPLICACION_MODULO_1.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Node / Angular
+**/node_modules/
+**/dist/
+**/.angular/
+.DS_Store
+**/.DS_Store
 
 ### STS ###
 .apt_generated

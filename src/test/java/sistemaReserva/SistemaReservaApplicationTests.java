@@ -5,49 +5,54 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import sistemaReserva.controller.AuthController;
-import sistemaReserva.model.Usuario;
+import sistemaReserva.controller.ServicioController;
+import sistemaReserva.dto.*;
+import sistemaReserva.service.ServicioService;
 
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// Pruebas directas de los endpoints de autenticacion
 @SpringBootTest
 class SistemaReservaApplicationTests {
 
     @Autowired
     private AuthController authController;
 
+    @Autowired
+    private ServicioController servicioController;
+
+    @Autowired
+    private ServicioService servicioService;
+
     @Test
     void testLoginAdminExitoso() {
-        // Probar inicio de sesion con admin precargado
-        ResponseEntity<?> response = authController.login(Map.of(
-                "email", "admin@andessuites.com",
-                "password", "admin123"
-        ));
+        LoginRequestDTO request = new LoginRequestDTO("admin@andessuites.com", "admin123");
+        ResponseEntity<?> response = authController.login(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map<?, ?> body = (Map<?, ?>) response.getBody();
-        assertNotNull(body.get("token"));
-        assertEquals("ADMIN", body.get("rol"));
+        AuthResponseDTO body = (AuthResponseDTO) response.getBody();
+        assertNotNull(body);
+        assertNotNull(body.getToken());
+        assertEquals("ADMIN", body.getRol());
     }
 
     @Test
     void testLoginCredencialesIncorrectas() {
-        // Probar login con clave incorrecta
-        ResponseEntity<?> response = authController.login(Map.of(
-                "email", "admin@andessuites.com",
-                "password", "claveErronea"
-        ));
+        LoginRequestDTO request = new LoginRequestDTO("admin@andessuites.com", "claveErronea");
+        ResponseEntity<?> response = authController.login(request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
     void testRegistroNuevoUsuario() {
-        // Probar registro de un cliente nuevo
-        Usuario nuevo = new Usuario(
+        RegisterRequestDTO nuevo = new RegisterRequestDTO(
                 "Lucia",
                 "Torres",
                 "lucia.torres@example.com",
@@ -58,22 +63,48 @@ class SistemaReservaApplicationTests {
 
         ResponseEntity<?> response = authController.register(nuevo);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        AuthResponseDTO body = (AuthResponseDTO) response.getBody();
+        assertNotNull(body);
+        assertEquals("lucia.torres@example.com", body.getEmail());
     }
 
     @Test
     void testPerfilConToken() {
-        // 1. Obtener token
-        ResponseEntity<?> loginResponse = authController.login(Map.of(
-                "email", "cliente@andessuites.com",
-                "password", "cliente123"
-        ));
-        Map<?, ?> body = (Map<?, ?>) loginResponse.getBody();
-        String token = (String) body.get("token");
+        // Simular autenticación en SecurityContext
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "cliente@andessuites.com",
+                        null,
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_CLIENTE"))
+                )
+        );
 
-        // 2. Consultar perfil con el token
-        ResponseEntity<?> perfilResponse = authController.verPerfil("Bearer " + token);
+        ResponseEntity<?> perfilResponse = authController.verPerfil();
         assertEquals(HttpStatus.OK, perfilResponse.getStatusCode());
-        Usuario usuario = (Usuario) perfilResponse.getBody();
+        UsuarioResponseDTO usuario = (UsuarioResponseDTO) perfilResponse.getBody();
+        assertNotNull(usuario);
         assertEquals("cliente@andessuites.com", usuario.getEmail());
+
+        // Limpiar contexto
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void testListarServicios() {
+        ResponseEntity<List<ServicioDTO>> response = servicioController.listar(false);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<ServicioDTO> servicios = response.getBody();
+        assertNotNull(servicios);
+        assertFalse(servicios.isEmpty(), "Deben existir servicios precargados en el sistema");
+    }
+
+    @Test
+    void testConsultaJpqlServiciosPorPrecio() {
+        List<ServicioDTO> resultado = servicioService.buscarDisponiblesPorPrecioMax(400.0);
+        assertNotNull(resultado);
+        for (ServicioDTO s : resultado) {
+            assertTrue(s.getPrecio() <= 400.0);
+            assertTrue(s.getDisponible());
+        }
     }
 }
