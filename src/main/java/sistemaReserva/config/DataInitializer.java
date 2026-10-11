@@ -109,8 +109,8 @@ public class DataInitializer implements CommandLineRunner {
         Usuario admin = null;
         if (!usuarioRepository.existsByEmail("admin@andessuites.com")) {
             admin = new Usuario(
-                    "Administrador",
-                    "Principal",
+                    "Luis",
+                    "Escobedo",
                     "admin@andessuites.com",
                     passwordEncoder.encode("admin123"),
                     "987654321",

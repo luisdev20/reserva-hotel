@@ -18,22 +18,6 @@ import { AuthService } from '../../services/auth.service';
 
         <h2 style="font-size:20px;text-align:center;margin-bottom:20px;font-family:var(--serif)">INICIAR SESIÓN</h2>
 
-        <!-- SELECTOR DE ROL DE PRUEBA -->
-        <div style="display:flex;gap:8px;margin-bottom:22px">
-          <button type="button" (click)="cargarCredenciales('CLIENTE')"
-            [style.background]="rolSeleccionado === 'CLIENTE' ? 'var(--night)' : '#FBF9F4'"
-            [style.color]="rolSeleccionado === 'CLIENTE' ? 'var(--gold)' : 'var(--ink-soft)'"
-            style="flex:1;padding:10px 6px;border:1px solid var(--stone);border-radius:6px;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <i class="fa-solid fa-user"></i> Huésped
-          </button>
-          <button type="button" (click)="cargarCredenciales('ADMIN')"
-            [style.background]="rolSeleccionado === 'ADMIN' ? 'var(--night)' : '#FBF9F4'"
-            [style.color]="rolSeleccionado === 'ADMIN' ? 'var(--gold)' : 'var(--ink-soft)'"
-            style="flex:1;padding:10px 6px;border:1px solid var(--stone);border-radius:6px;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px">
-            <i class="fa-solid fa-crown"></i> Admin
-          </button>
-        </div>
-
         <!-- FORMULARIO -->
         <form (ngSubmit)="iniciarSesion()">
           <div class="field">
@@ -69,9 +53,8 @@ import { AuthService } from '../../services/auth.service';
   `
 })
 export class LoginComponent {
-  email = 'cliente@andessuites.com';
-  password = 'cliente123';
-  rolSeleccionado: 'CLIENTE' | 'ADMIN' = 'CLIENTE';
+  email = '';
+  password = '';
   cargando = false;
   errorMsg = '';
 
@@ -79,17 +62,6 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router
   ) {}
-
-  cargarCredenciales(rol: 'CLIENTE' | 'ADMIN'): void {
-    this.rolSeleccionado = rol;
-    if (rol === 'ADMIN') {
-      this.email = 'admin@andessuites.com';
-      this.password = 'admin123';
-    } else {
-      this.email = 'cliente@andessuites.com';
-      this.password = 'cliente123';
-    }
-  }
 
   iniciarSesion(): void {
     this.cargando = true;

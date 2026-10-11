@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,16 +14,11 @@ import { Categoria, Reserva, Servicio } from '../../models/models';
     <div style="padding:40px 0;background:var(--cream);min-height:calc(100vh - 140px)">
       <div class="wrap">
         <!-- HEADER DEL PANEL -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
-          <div>
-            <h1 style="font-size:28px">Panel Administrativo</h1>
-            <p style="color:var(--ink-soft);font-size:14px;margin-top:4px">
-              Gestión centralizada de suites, servicios, reservas y usuarios de Andes Suites.
-            </p>
-          </div>
-          <span style="background:var(--gold);color:var(--night-2);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;letter-spacing:1px">
-            ROL: ADMIN
-          </span>
+        <div style="margin-bottom:28px">
+          <h1 style="font-size:28px">Panel Administrativo</h1>
+          <p style="color:var(--ink-soft);font-size:14px;margin-top:4px">
+            Gestión centralizada de suites, servicios, reservas y usuarios de Andes Suites.
+          </p>
         </div>
 
         <!-- KPI CARDS (DEL PANEL DE ANDES SUITES) -->
@@ -52,7 +47,7 @@ import { Categoria, Reserva, Servicio } from '../../models/models';
             [style.border-bottom]="pestana === 'servicios' ? '2px solid var(--gold)' : 'none'"
             [style.color]="pestana === 'servicios' ? 'var(--night)' : 'var(--ink-soft)'"
             style="padding:10px 18px;font-weight:600;font-size:14px;background:none">
-            <i class="fa-solid fa-bed"></i> Gestión de Servicios (CRUD)
+            <i class="fa-solid fa-bed"></i> Suites y Servicios
           </button>
           <button (click)="pestana = 'reservas'"
             [style.border-bottom]="pestana === 'reservas' ? '2px solid var(--gold)' : 'none'"
@@ -276,7 +271,8 @@ export class AdminComponent implements OnInit {
   constructor(
     private reservaService: ReservaService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -288,14 +284,24 @@ export class AdminComponent implements OnInit {
   }
 
   cargarDatos(): void {
-    this.reservaService.getServicios(false).subscribe(data => this.servicios = data);
-    this.reservaService.getTodasReservas().subscribe(data => this.reservas = data);
-    this.authService.listarUsuarios().subscribe(data => this.usuarios = data);
+    this.reservaService.getServicios(false).subscribe(data => {
+      this.servicios = data;
+      this.cdr.detectChanges();
+    });
+    this.reservaService.getTodasReservas().subscribe(data => {
+      this.reservas = data;
+      this.cdr.detectChanges();
+    });
+    this.authService.listarUsuarios().subscribe(data => {
+      this.usuarios = data;
+      this.cdr.detectChanges();
+    });
     this.reservaService.getCategorias().subscribe(data => {
       this.categorias = data;
       if (data.length > 0) {
         this.servicioForm.categoriaId = data[0].id;
       }
+      this.cdr.detectChanges();
     });
   }
 

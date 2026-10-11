@@ -21,12 +21,12 @@ import { AuthService } from '../../services/auth.service';
         <div class="nav-cta">
           <ng-container *ngIf="!authService.isLoggedIn()">
             <a routerLink="/login" class="btn btn-outline btn-sm">Iniciar sesión</a>
-            <a routerLink="/registro" class="btn btn-gold btn-sm">Registrarse</a>
           </ng-container>
           <ng-container *ngIf="authService.isLoggedIn()">
             <div class="nav-user">
+              <i class="fa-regular fa-circle-user" style="color:var(--gold);font-size:16px"></i>
               <span>{{ authService.getCurrentUser()?.nombre }}</span>
-              <span class="role-badge">{{ authService.getCurrentUser()?.rol }}</span>
+              <span *ngIf="authService.isAdmin()" class="role-badge">Admin</span>
             </div>
             <button (click)="logout()" class="btn btn-outline btn-sm">
               <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir

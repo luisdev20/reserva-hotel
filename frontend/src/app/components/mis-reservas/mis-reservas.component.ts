@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../services/reserva.service';
@@ -82,7 +82,8 @@ export class MisReservasComponent implements OnInit {
   constructor(
     private reservaService: ReservaService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -95,8 +96,14 @@ export class MisReservasComponent implements OnInit {
 
   cargarReservas(): void {
     this.reservaService.getMisReservas().subscribe({
-      next: (data) => this.reservas = data,
-      error: () => this.mensajeError = 'Error al cargar tus reservas'
+      next: (data) => {
+        this.reservas = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.mensajeError = 'Error al cargar tus reservas';
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -107,7 +114,10 @@ export class MisReservasComponent implements OnInit {
           this.mensajeExito = 'Reserva cancelada exitosamente';
           this.cargarReservas();
         },
-        error: (err) => this.mensajeError = err.error?.error || 'Error al cancelar la reserva'
+        error: (err) => {
+          this.mensajeError = err.error?.error || 'Error al cancelar la reserva';
+          this.cdr.detectChanges();
+        }
       });
     }
   }
