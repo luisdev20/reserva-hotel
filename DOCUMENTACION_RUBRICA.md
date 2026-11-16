@@ -778,6 +778,7 @@ El repositorio está organizado con commits por feature, con mensajes breves en 
 8. `fix(backend): respuestas 401 y 403 en formato JSON`
 9. `feat(ui): mejora metadatos y accesibilidad del shell`
 10. `docs: documenta arquitectura y rubrica de evaluacion`
+11. `fix(backend): protege registro y eliminacion de servicios`
 
 ---
 
