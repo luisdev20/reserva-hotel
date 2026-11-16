@@ -1,0 +1,353 @@
+<div class="admin-page">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Panel administrativo</h1>
+      <p>Gestión centralizada de suites, reservas y usuarios de Andes Suites.</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span>Suites y servicios</span>
+        <strong>{{ totalServicios() }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Reservas totales</span>
+        <strong>{{ totalReservas() }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Reservas activas</span>
+        <strong>{{ reservasActivas() }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Usuarios registrados</span>
+        <strong>{{ totalUsuarios() }}</strong>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Secciones del panel">
+      <button
+        type="button"
+        class="tab"
+        role="tab"
+        [class.activa]="pestana() === 'servicios'"
+        [attr.aria-selected]="pestana() === 'servicios'"
+        (click)="pestana.set('servicios')">
+        <i class="fa-solid fa-bed"></i>
+        Suites y servicios
+      </button>
+      <button
+        type="button"
+        class="tab"
+        role="tab"
+        [class.activa]="pestana() === 'reservas'"
+        [attr.aria-selected]="pestana() === 'reservas'"
+        (click)="pestana.set('reservas')">
+        <i class="fa-solid fa-calendar-check"></i>
+        Reservas
+      </button>
+      <button
+        type="button"
+        class="tab"
+        role="tab"
+        [class.activa]="pestana() === 'usuarios'"
+        [attr.aria-selected]="pestana() === 'usuarios'"
+        (click)="pestana.set('usuarios')">
+        <i class="fa-solid fa-users"></i>
+        Usuarios
+      </button>
+    </div>
+
+    @if (errorCarga()) {
+      <div class="alert alert-error" role="alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ errorCarga() }}</span>
+        <button type="button" class="btn btn-outline-dark btn-sm" (click)="cargarDatos()">
+          Reintentar
+        </button>
+      </div>
+    }
+
+    @if (cargando()) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Cargando información del panel...</p>
+      </div>
+    }
+
+    @if (!cargando() && pestana() === 'servicios') {
+      <div class="section-title-row">
+        <h2>Catálogo de servicios</h2>
+        <button type="button" class="btn btn-gold btn-sm" (click)="abrirModalNuevo()">
+          <i class="fa-solid fa-plus"></i>
+          Nuevo servicio
+        </button>
+      </div>
+
+      @if (servicios().length === 0) {
+        <div class="empty-state">
+          <i class="fa-solid fa-bed"></i>
+          <h3>No hay servicios registrados</h3>
+          <p>Crea la primera suite o servicio para que aparezca en el catálogo.</p>
+        </div>
+      } @else {
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Capacidad</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (servicio of servicios(); track servicio.id) {
+                <tr>
+                  <td data-label="ID">#{{ servicio.id }}</td>
+                  <td data-label="Nombre"><strong>{{ servicio.nombre }}</strong></td>
+                  <td data-label="Categoría">{{ servicio.categoriaNombre }}</td>
+                  <td data-label="Precio">S/ {{ servicio.precio }}</td>
+                  <td data-label="Capacidad">{{ servicio.capacidad }} personas</td>
+                  <td data-label="Estado">
+                    <span class="badge" [class.badge-active]="servicio.disponible" [class.badge-inactive]="!servicio.disponible">
+                      {{ servicio.disponible ? 'Disponible' : 'No disponible' }}
+                    </span>
+                  </td>
+                  <td data-label="Acciones">
+                    <div class="table-actions">
+                      <button type="button" class="btn btn-outline-dark btn-sm" (click)="abrirModalEditar(servicio)">
+                        <i class="fa-solid fa-pen"></i>
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        (click)="eliminarServicio(servicio.id!)"
+                        [attr.aria-label]="'Eliminar ' + servicio.nombre">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    @if (!cargando() && pestana() === 'reservas') {
+      <div class="section-title-row">
+        <h2>Historial general de reservas</h2>
+      </div>
+
+      @if (reservas().length === 0) {
+        <div class="empty-state">
+          <i class="fa-solid fa-calendar-xmark"></i>
+          <h3>No hay reservas registradas</h3>
+          <p>Las reservas creadas desde el catálogo aparecerán aquí.</p>
+        </div>
+      } @else {
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Huésped</th>
+                <th>Email</th>
+                <th>Suite</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (reserva of reservas(); track reserva.id) {
+                <tr>
+                  <td data-label="ID">#{{ reserva.id }}</td>
+                  <td data-label="Huésped">{{ reserva.usuarioNombreCompleto }}</td>
+                  <td data-label="Email">{{ reserva.usuarioEmail }}</td>
+                  <td data-label="Suite"><strong>{{ reserva.servicioNombre }}</strong></td>
+                  <td data-label="Entrada">{{ formatearFecha(reserva.fechaEntrada) }}</td>
+                  <td data-label="Salida">{{ formatearFecha(reserva.fechaSalida) }}</td>
+                  <td data-label="Total"><strong>S/ {{ reserva.total }}</strong></td>
+                  <td data-label="Estado">
+                    <span class="badge" [class.badge-active]="reserva.estado === 'CONFIRMADA'" [class.badge-inactive]="reserva.estado === 'CANCELADA'">
+                      {{ reserva.estado }}
+                    </span>
+                  </td>
+                  <td data-label="Acción">
+                    @if (reserva.estado !== 'CANCELADA') {
+                      <button type="button" class="btn btn-danger btn-sm" (click)="cancelarReserva(reserva.id!)">
+                        Cancelar
+                      </button>
+                    } @else {
+                      <span class="text-muted">Sin acciones</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    @if (!cargando() && pestana() === 'usuarios') {
+      <div class="section-title-row">
+        <h2>Usuarios registrados</h2>
+      </div>
+
+      @if (usuarios().length === 0) {
+        <div class="empty-state">
+          <i class="fa-solid fa-users"></i>
+          <h3>No hay usuarios registrados</h3>
+          <p>Los clientes que se registren aparecerán en esta lista.</p>
+        </div>
+      } @else {
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Rol</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (usuario of usuarios(); track usuario.id) {
+                <tr>
+                  <td data-label="ID">#{{ usuario.id }}</td>
+                  <td data-label="Nombre">{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                  <td data-label="Email">{{ usuario.email }}</td>
+                  <td data-label="Teléfono">{{ usuario.telefono || '—' }}</td>
+                  <td data-label="Rol">
+                    <span class="badge badge-gold">{{ usuario.rol }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+@if (modalAbierto()) {
+  <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-servicio" (click)="cerrarModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3 id="titulo-servicio">{{ modoEdicion() ? 'Editar servicio' : 'Nuevo servicio' }}</h3>
+      <p class="modal-subtitle">
+        Los cambios se reflejan de inmediato en el catálogo público.
+      </p>
+
+      <form [formGroup]="servicioForm" (ngSubmit)="guardarServicio()" novalidate>
+        <div class="field">
+          <label for="servicio-nombre">Nombre del servicio o suite</label>
+          <input id="servicio-nombre" type="text" formControlName="nombre" placeholder="Ej: Suite Panorámica">
+          @if (nombre.invalid && nombre.touched) {
+            <p class="field-error">
+              @if (nombre.hasError('required')) {
+                El nombre es obligatorio.
+              } @else if (nombre.hasError('minlength')) {
+                Usa al menos 3 caracteres.
+              } @else {
+                Máximo 80 caracteres.
+              }
+            </p>
+          }
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="servicio-categoria">Categoría</label>
+            <select id="servicio-categoria" formControlName="categoriaId">
+              @for (categoria of categorias(); track categoria.id) {
+                <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+              }
+            </select>
+            @if (categoriaId.invalid && categoriaId.touched) {
+              <p class="field-error">Selecciona una categoría.</p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="servicio-precio">Precio por noche (S/)</label>
+            <input id="servicio-precio" type="number" formControlName="precio" min="1" step="0.01">
+            @if (precio.invalid && precio.touched) {
+              <p class="field-error">El precio debe ser mayor que cero.</p>
+            }
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="servicio-capacidad">Capacidad (personas)</label>
+            <input id="servicio-capacidad" type="number" formControlName="capacidad" min="1" max="12">
+            @if (capacidad.invalid && capacidad.touched) {
+              <p class="field-error">Ingresa una capacidad entre 1 y 12.</p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="servicio-disponible">Disponibilidad</label>
+            <select id="servicio-disponible" formControlName="disponible">
+              <option [ngValue]="true">Disponible</option>
+              <option [ngValue]="false">No disponible</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="servicio-descripcion">Descripción</label>
+          <textarea
+            id="servicio-descripcion"
+            formControlName="descripcion"
+            maxlength="300"
+            placeholder="Detalles de la suite o amenidad..."></textarea>
+          @if (descripcion.invalid && descripcion.touched) {
+            <p class="field-error">
+              @if (descripcion.hasError('required')) {
+                La descripción es obligatoria.
+              } @else if (descripcion.hasError('minlength')) {
+                Usa al menos 10 caracteres.
+              } @else {
+                Máximo 300 caracteres.
+              }
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="servicio-imagen">Imagen (opcional)</label>
+          <input id="servicio-imagen" type="text" formControlName="imagenUrl" placeholder="assets/img/suite.jpg">
+          <p class="field-hint">Ruta relativa de la imagen dentro de la carpeta pública.</p>
+        </div>
+
+        @if (errorModal()) {
+          <div class="alert alert-error" role="alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ errorModal() }}</span>
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline-dark btn-sm" (click)="cerrarModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-gold btn-sm" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar servicio' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

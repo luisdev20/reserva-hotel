@@ -1,385 +1,223 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Categoria, Reserva, Servicio } from '../../core/models/models';
+import { ToastService } from '../../core/services/toast.service';
+import { Categoria, Reserva, Servicio, Usuario } from '../../core/models/models';
+
+type Pestana = 'servicios' | 'reservas' | 'usuarios';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div style="padding:40px 0;background:var(--cream);min-height:calc(100vh - 140px)">
-      <div class="wrap">
-        <!-- HEADER DEL PANEL -->
-        <div style="margin-bottom:28px">
-          <h1 style="font-size:28px">Panel Administrativo</h1>
-          <p style="color:var(--ink-soft);font-size:14px;margin-top:4px">
-            Gestión centralizada de suites, servicios, reservas y usuarios de Andes Suites.
-          </p>
-        </div>
-
-        <!-- KPI CARDS (DEL PANEL DE ANDES SUITES) -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:32px">
-          <div style="background:#fff;border:1px solid var(--stone);border-radius:6px;padding:20px">
-            <span style="font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px">Suites / Servicios</span>
-            <strong style="font-family:var(--serif);font-size:28px;color:var(--night);display:block;margin-top:6px">{{ servicios.length }}</strong>
-          </div>
-          <div style="background:#fff;border:1px solid var(--stone);border-radius:6px;padding:20px">
-            <span style="font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px">Total Reservas</span>
-            <strong style="font-family:var(--serif);font-size:28px;color:var(--night);display:block;margin-top:6px">{{ reservas.length }}</strong>
-          </div>
-          <div style="background:#fff;border:1px solid var(--stone);border-radius:6px;padding:20px">
-            <span style="font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px">Usuarios Registrados</span>
-            <strong style="font-family:var(--serif);font-size:28px;color:var(--night);display:block;margin-top:6px">{{ usuarios.length }}</strong>
-          </div>
-          <div style="background:#fff;border:1px solid var(--stone);border-radius:6px;padding:20px">
-            <span style="font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px">Sobreventas</span>
-            <strong style="font-family:var(--serif);font-size:28px;color:var(--gold-2);display:block;margin-top:6px">0%</strong>
-          </div>
-        </div>
-
-        <!-- PESTAÑAS -->
-        <div style="display:flex;gap:12px;border-bottom:1px solid var(--stone);margin-bottom:24px">
-          <button (click)="pestana = 'servicios'"
-            [style.border-bottom]="pestana === 'servicios' ? '2px solid var(--gold)' : 'none'"
-            [style.color]="pestana === 'servicios' ? 'var(--night)' : 'var(--ink-soft)'"
-            style="padding:10px 18px;font-weight:600;font-size:14px;background:none">
-            <i class="fa-solid fa-bed"></i> Suites y Servicios
-          </button>
-          <button (click)="pestana = 'reservas'"
-            [style.border-bottom]="pestana === 'reservas' ? '2px solid var(--gold)' : 'none'"
-            [style.color]="pestana === 'reservas' ? 'var(--night)' : 'var(--ink-soft)'"
-            style="padding:10px 18px;font-weight:600;font-size:14px;background:none">
-            <i class="fa-solid fa-calendar-check"></i> Reservas Realizadas
-          </button>
-          <button (click)="pestana = 'usuarios'"
-            [style.border-bottom]="pestana === 'usuarios' ? '2px solid var(--gold)' : 'none'"
-            [style.color]="pestana === 'usuarios' ? 'var(--night)' : 'var(--ink-soft)'"
-            style="padding:10px 18px;font-weight:600;font-size:14px;background:none">
-            <i class="fa-solid fa-users"></i> Usuarios
-          </button>
-        </div>
-
-        <!-- ALERTAS -->
-        <div *ngIf="mensajeExito" class="alert alert-success">
-          <i class="fa-solid fa-check"></i> {{ mensajeExito }}
-        </div>
-        <div *ngIf="mensajeError" class="alert alert-error">
-          <i class="fa-solid fa-circle-exclamation"></i> {{ mensajeError }}
-        </div>
-
-        <!-- SECCION 1: CRUD DE SERVICIOS -->
-        <div *ngIf="pestana === 'servicios'">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <h3>Catálogo de Servicios y Habitaciones</h3>
-            <button (click)="abrirModalNuevo()" class="btn btn-gold btn-sm">
-              <i class="fa-solid fa-plus"></i> Nuevo Servicio
-            </button>
-          </div>
-
-          <div class="data-table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Categoría</th>
-                  <th>Precio (S/)</th>
-                  <th>Capacidad</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let s of servicios">
-                  <td>#{{ s.id }}</td>
-                  <td><strong>{{ s.nombre }}</strong></td>
-                  <td>{{ s.categoriaNombre }}</td>
-                  <td>S/ {{ s.precio }}</td>
-                  <td>{{ s.capacidad }} pers.</td>
-                  <td>
-                    <span class="badge" [ngClass]="s.disponible ? 'badge-active' : 'badge-inactive'">
-                      {{ s.disponible ? 'Disponible' : 'No disponible' }}
-                    </span>
-                  </td>
-                  <td style="display:flex;gap:8px">
-                    <button (click)="abrirModalEditar(s)" class="btn btn-outline-dark btn-sm" style="padding:4px 8px">
-                      <i class="fa-solid fa-pen-to-square"></i> Editar
-                    </button>
-                    <button (click)="eliminarServicio(s.id!)" class="btn btn-danger btn-sm" style="padding:4px 8px">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- SECCION 2: RESERVAS -->
-        <div *ngIf="pestana === 'reservas'">
-          <h3>Historial General de Reservas</h3>
-          <div class="data-table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Huésped</th>
-                  <th>Email</th>
-                  <th>Servicio / Suite</th>
-                  <th>Entrada</th>
-                  <th>Salida</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let r of reservas">
-                  <td>#{{ r.id }}</td>
-                  <td>{{ r.usuarioNombreCompleto }}</td>
-                  <td>{{ r.usuarioEmail }}</td>
-                  <td><strong>{{ r.servicioNombre }}</strong></td>
-                  <td>{{ r.fechaEntrada }}</td>
-                  <td>{{ r.fechaSalida }}</td>
-                  <td><strong>S/ {{ r.total }}</strong></td>
-                  <td>
-                    <span class="badge" [ngClass]="r.estado === 'CONFIRMADA' ? 'badge-active' : 'badge-inactive'">
-                      {{ r.estado }}
-                    </span>
-                  </td>
-                  <td>
-                    <button *ngIf="r.estado !== 'CANCELADA'" (click)="cancelarReserva(r.id!)" class="btn btn-danger btn-sm" style="padding:4px 8px">
-                      Cancelar
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- SECCION 3: USUARIOS -->
-        <div *ngIf="pestana === 'usuarios'">
-          <h3>Usuarios Registrados</h3>
-          <div class="data-table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Teléfono</th>
-                  <th>Rol</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let u of usuarios">
-                  <td>#{{ u.id }}</td>
-                  <td>{{ u.nombre }} {{ u.apellido }}</td>
-                  <td>{{ u.email }}</td>
-                  <td>{{ u.telefono || '—' }}</td>
-                  <td>
-                    <span class="badge badge-gold">{{ u.rol }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- MODAL CREAR / EDITAR SERVICIO -->
-    <div *ngIf="modalAbierto" style="position:fixed;inset:0;background:rgba(20,27,36,.65);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px;">
-      <div style="background:#fff;border-radius:8px;padding:32px;max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3)">
-        <h3 style="margin-bottom:18px">{{ modoEdicion ? 'Editar Servicio' : 'Nuevo Servicio' }}</h3>
-
-        <form (ngSubmit)="guardarServicio()">
-          <div class="field">
-            <label>Nombre del servicio / suite</label>
-            <input type="text" [(ngModel)]="servicioForm.nombre" name="nombre" required placeholder="Ej: Suite Panorámica">
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field">
-              <label>Categoría</label>
-              <select [(ngModel)]="servicioForm.categoriaId" name="categoriaId" required>
-                <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Precio por noche (S/)</label>
-              <input type="number" [(ngModel)]="servicioForm.precio" name="precio" required min="1" step="0.01">
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field">
-              <label>Capacidad (personas)</label>
-              <input type="number" [(ngModel)]="servicioForm.capacidad" name="capacidad" required min="1">
-            </div>
-            <div class="field">
-              <label>Disponibilidad</label>
-              <select [(ngModel)]="servicioForm.disponible" name="disponible">
-                <option [ngValue]="true">Disponible</option>
-                <option [ngValue]="false">No disponible</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Descripción</label>
-            <textarea [(ngModel)]="servicioForm.descripcion" name="descripcion" placeholder="Detalles de la suite o amenidad..."></textarea>
-          </div>
-
-          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
-            <button type="button" (click)="cerrarModal()" class="btn btn-outline-dark btn-sm">Cancelar</button>
-            <button type="submit" class="btn btn-gold btn-sm">Guardar Servicio</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `
+  imports: [ReactiveFormsModule],
+  templateUrl: './admin.component.html',
+  styleUrl: './admin.component.css'
 })
 export class AdminComponent implements OnInit {
-  pestana: 'servicios' | 'reservas' | 'usuarios' = 'servicios';
-  servicios: Servicio[] = [];
-  reservas: Reserva[] = [];
-  usuarios: any[] = [];
-  categorias: Categoria[] = [];
+  private readonly fb = inject(FormBuilder);
+  private readonly reservaService = inject(ReservaService);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
-  modalAbierto = false;
-  modoEdicion = false;
-  servicioEditandoId: number | null = null;
-  servicioForm: Servicio = {
-    nombre: '',
-    descripcion: '',
-    precio: 200,
-    capacidad: 2,
-    disponible: true,
-    categoriaId: 1
-  };
+  readonly pestana = signal<Pestana>('servicios');
+  readonly servicios = signal<Servicio[]>([]);
+  readonly reservas = signal<Reserva[]>([]);
+  readonly usuarios = signal<Usuario[]>([]);
+  readonly categorias = signal<Categoria[]>([]);
 
-  mensajeExito = '';
-  mensajeError = '';
+  readonly cargando = signal(true);
+  readonly errorCarga = signal('');
+  readonly modalAbierto = signal(false);
+  readonly modoEdicion = signal(false);
+  readonly guardando = signal(false);
+  readonly errorModal = signal('');
+  private servicioEditandoId: number | null = null;
 
-  constructor(
-    private reservaService: ReservaService,
-    private authService: AuthService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
+  readonly totalServicios = computed(() => this.servicios().length);
+  readonly totalReservas = computed(() => this.reservas().length);
+  readonly reservasActivas = computed(
+    () => this.reservas().filter((reserva) => reserva.estado === 'CONFIRMADA').length
+  );
+  readonly totalUsuarios = computed(() => this.usuarios().length);
+
+  readonly servicioForm = this.fb.nonNullable.group({
+    nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(80)]],
+    descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(300)]],
+    categoriaId: [1, [Validators.required, Validators.min(1)]],
+    precio: [250, [Validators.required, Validators.min(1)]],
+    capacidad: [2, [Validators.required, Validators.min(1), Validators.max(12)]],
+    disponible: [true],
+    imagenUrl: ['']
+  });
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn() || !this.authService.isAdmin()) {
-      this.router.navigate(['/login']);
-      return;
-    }
     this.cargarDatos();
   }
 
+  get nombre() {
+    return this.servicioForm.controls.nombre;
+  }
+
+  get descripcion() {
+    return this.servicioForm.controls.descripcion;
+  }
+
+  get categoriaId() {
+    return this.servicioForm.controls.categoriaId;
+  }
+
+  get precio() {
+    return this.servicioForm.controls.precio;
+  }
+
+  get capacidad() {
+    return this.servicioForm.controls.capacidad;
+  }
+
+  get imagenUrl() {
+    return this.servicioForm.controls.imagenUrl;
+  }
+
   cargarDatos(): void {
-    this.reservaService.getServicios(false).subscribe(data => {
-      this.servicios = data;
-      this.cdr.detectChanges();
-    });
-    this.reservaService.getTodasReservas().subscribe(data => {
-      this.reservas = data;
-      this.cdr.detectChanges();
-    });
-    this.authService.listarUsuarios().subscribe(data => {
-      this.usuarios = data;
-      this.cdr.detectChanges();
-    });
-    this.reservaService.getCategorias().subscribe(data => {
-      this.categorias = data;
-      if (data.length > 0) {
-        this.servicioForm.categoriaId = data[0].id;
+    this.cargando.set(true);
+    this.errorCarga.set('');
+
+    // forkJoin ejecuta las cuatro peticiones en paralelo y espera la última.
+    forkJoin({
+      servicios: this.reservaService.getServicios(),
+      reservas: this.reservaService.getTodasReservas(),
+      usuarios: this.authService.listarUsuarios(),
+      categorias: this.reservaService.getCategorias()
+    }).subscribe({
+      next: ({ servicios, reservas, usuarios, categorias }) => {
+        this.servicios.set(servicios);
+        this.reservas.set(reservas);
+        this.usuarios.set(usuarios);
+        this.categorias.set(categorias);
+
+        if (categorias.length > 0) {
+          this.servicioForm.controls.categoriaId.setValue(categorias[0].id);
+        }
+        this.cargando.set(false);
+      },
+      error: (error: Error) => {
+        this.cargando.set(false);
+        this.errorCarga.set(error.message);
       }
-      this.cdr.detectChanges();
     });
   }
 
   abrirModalNuevo(): void {
-    this.modoEdicion = false;
+    this.modoEdicion.set(false);
     this.servicioEditandoId = null;
-    this.servicioForm = {
+    this.errorModal.set('');
+    this.servicioForm.reset({
       nombre: '',
       descripcion: '',
+      categoriaId: this.categorias()[0]?.id ?? 1,
       precio: 250,
       capacidad: 2,
       disponible: true,
-      categoriaId: this.categorias[0]?.id || 1
-    };
-    this.modalAbierto = true;
+      imagenUrl: ''
+    });
+    this.modalAbierto.set(true);
   }
 
-  abrirModalEditar(s: Servicio): void {
-    this.modoEdicion = true;
-    this.servicioEditandoId = s.id!;
-    this.servicioForm = {
-      nombre: s.nombre,
-      descripcion: s.descripcion,
-      precio: s.precio,
-      capacidad: s.capacidad,
-      disponible: s.disponible,
-      categoriaId: s.categoriaId
-    };
-    this.modalAbierto = true;
+  abrirModalEditar(servicio: Servicio): void {
+    this.modoEdicion.set(true);
+    this.servicioEditandoId = servicio.id ?? null;
+    this.errorModal.set('');
+    this.servicioForm.reset({
+      nombre: servicio.nombre,
+      descripcion: servicio.descripcion,
+      categoriaId: servicio.categoriaId,
+      precio: servicio.precio,
+      capacidad: servicio.capacidad,
+      disponible: servicio.disponible,
+      imagenUrl: servicio.imagenUrl ?? ''
+    });
+    this.modalAbierto.set(true);
   }
 
   cerrarModal(): void {
-    this.modalAbierto = false;
+    this.modalAbierto.set(false);
+    this.errorModal.set('');
   }
 
   guardarServicio(): void {
-    if (this.modoEdicion && this.servicioEditandoId) {
-      this.reservaService.actualizarServicio(this.servicioEditandoId, this.servicioForm).subscribe({
-        next: () => {
-          this.mensajeExito = 'Servicio actualizado correctamente';
-          this.modalAbierto = false;
-          this.cargarDatos();
-        },
-        error: (err) => this.mensajeError = err.error?.error || 'Error al actualizar servicio'
-      });
-    } else {
-      this.reservaService.crearServicio(this.servicioForm).subscribe({
-        next: () => {
-          this.mensajeExito = 'Servicio creado exitosamente';
-          this.modalAbierto = false;
-          this.cargarDatos();
-        },
-        error: (err) => this.mensajeError = err.error?.error || 'Error al crear servicio'
-      });
+    if (this.servicioForm.invalid) {
+      this.servicioForm.markAllAsTouched();
+      return;
     }
+
+    const valores = this.servicioForm.getRawValue();
+    const servicio: Servicio = {
+      nombre: valores.nombre.trim(),
+      descripcion: valores.descripcion.trim(),
+      categoriaId: valores.categoriaId,
+      precio: valores.precio,
+      capacidad: valores.capacidad,
+      disponible: valores.disponible,
+      imagenUrl: valores.imagenUrl.trim() || undefined
+    };
+
+    this.guardando.set(true);
+    const peticion = this.modoEdicion() && this.servicioEditandoId
+      ? this.reservaService.actualizarServicio(this.servicioEditandoId, servicio)
+      : this.reservaService.crearServicio(servicio);
+
+    peticion.subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.toastService.exito(
+          this.modoEdicion() ? 'Servicio actualizado correctamente' : 'Servicio creado correctamente'
+        );
+        this.cerrarModal();
+        this.cargarDatos();
+      },
+      error: (error: Error) => {
+        this.guardando.set(false);
+        this.errorModal.set(error.message);
+      }
+    });
   }
 
   eliminarServicio(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
-      this.reservaService.eliminarServicio(id).subscribe({
-        next: () => {
-          this.mensajeExito = 'Servicio eliminado correctamente';
-          this.cargarDatos();
-        },
-        error: (err) => this.mensajeError = err.error?.error || 'Error al eliminar servicio'
-      });
+    if (!confirm('¿Deseas eliminar este servicio del catálogo?')) {
+      return;
     }
+
+    this.reservaService.eliminarServicio(id).subscribe({
+      next: (respuesta) => {
+        this.toastService.exito(respuesta.mensaje);
+        this.cargarDatos();
+      },
+      error: (error: Error) => this.toastService.error(error.message)
+    });
   }
 
   cancelarReserva(id: number): void {
-    if (confirm('¿Deseas cancelar esta reserva?')) {
-      this.reservaService.cancelarReserva(id).subscribe({
-        next: () => {
-          this.mensajeExito = 'Reserva cancelada correctamente';
-          this.cargarDatos();
-        },
-        error: (err) => this.mensajeError = err.error?.error || 'Error al cancelar reserva'
-      });
+    if (!confirm('¿Deseas cancelar esta reserva?')) {
+      return;
     }
+
+    this.reservaService.cancelarReserva(id).subscribe({
+      next: () => {
+        this.toastService.exito('Reserva cancelada correctamente');
+        this.cargarDatos();
+      },
+      error: (error: Error) => this.toastService.error(error.message)
+    });
+  }
+
+  formatearFecha(fecha: string | undefined): string {
+    if (!fecha) {
+      return '—';
+    }
+
+    const [anio, mes, dia] = fecha.split('-');
+    return `${dia}/${mes}/${anio}`;
   }
 }
