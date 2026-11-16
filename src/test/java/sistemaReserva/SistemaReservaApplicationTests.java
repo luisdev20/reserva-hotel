@@ -11,8 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import sistemaReserva.controller.AuthController;
 import sistemaReserva.controller.ServicioController;
 import sistemaReserva.dto.*;
+import sistemaReserva.model.Servicio;
+import sistemaReserva.repository.ServicioRepository;
+import sistemaReserva.service.ReservaService;
 import sistemaReserva.service.ServicioService;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +33,12 @@ class SistemaReservaApplicationTests {
 
     @Autowired
     private ServicioService servicioService;
+
+    @Autowired
+    private ReservaService reservaService;
+
+    @Autowired
+    private ServicioRepository servicioRepository;
 
     @Test
     void testLoginAdminExitoso() {
@@ -106,5 +116,37 @@ class SistemaReservaApplicationTests {
             assertTrue(s.getPrecio() <= 400.0);
             assertTrue(s.getDisponible());
         }
+    }
+
+    @Test
+    void testNoPermiteReservaSolapada() {
+        Servicio suiteAndina = servicioRepository.findAll().stream()
+                .filter(s -> s.getNombre().contains("Andina"))
+                .findFirst()
+                .orElseThrow();
+
+        // La reserva precargada ocupa desde hoy + 3 hasta hoy + 6.
+        ReservaDTO solicitud = new ReservaDTO(
+                suiteAndina.getId(),
+                LocalDate.now().plusDays(4),
+                LocalDate.now().plusDays(5),
+                "Intento de sobreventa");
+
+        assertThrows(IllegalStateException.class,
+                () -> reservaService.crearReserva("cliente@andessuites.com", solicitud));
+    }
+
+    @Test
+    void testNoPermiteReservaEnElPasado() {
+        Servicio suite = servicioRepository.findAll().stream().findFirst().orElseThrow();
+
+        ReservaDTO solicitud = new ReservaDTO(
+                suite.getId(),
+                LocalDate.now().minusDays(2),
+                LocalDate.now().plusDays(1),
+                "Fecha pasada");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> reservaService.crearReserva("cliente@andessuites.com", solicitud));
     }
 }

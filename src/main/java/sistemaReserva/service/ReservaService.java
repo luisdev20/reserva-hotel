@@ -11,6 +11,7 @@ import sistemaReserva.repository.ReservaRepository;
 import sistemaReserva.repository.ServicioRepository;
 import sistemaReserva.repository.UsuarioRepository;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,8 +41,21 @@ public class ReservaService {
             throw new IllegalStateException("El servicio o suite seleccionado no se encuentra disponible actualmente");
         }
 
+        // Regla de negocio: no se permiten reservas en el pasado.
+        if (dto.getFechaEntrada().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de entrada no puede ser anterior a hoy");
+        }
+
         if (dto.getFechaSalida().isBefore(dto.getFechaEntrada()) || dto.getFechaSalida().isEqual(dto.getFechaEntrada())) {
             throw new IllegalArgumentException("La fecha de salida debe ser posterior a la fecha de entrada");
+        }
+
+        // Regla de negocio: evita la sobreventa de una misma suite en fechas cruzadas.
+        long reservasSolapadas = reservaRepository.contarReservasSolapadas(
+                servicio.getId(), dto.getFechaEntrada(), dto.getFechaSalida());
+        if (reservasSolapadas > 0) {
+            throw new IllegalStateException(
+                    "La suite ya está reservada en el rango de fechas seleccionado. Elige otras fechas.");
         }
 
         long noches = ChronoUnit.DAYS.between(dto.getFechaEntrada(), dto.getFechaSalida());
@@ -87,6 +101,11 @@ public class ReservaService {
         // Verificar que pertenezca al usuario o que sea admin
         if (!esAdmin && !reserva.getUsuario().getEmail().equalsIgnoreCase(userEmail)) {
             throw new SecurityException("No tiene permisos para cancelar esta reserva");
+        }
+
+        // Evita cancelar dos veces la misma reserva.
+        if ("CANCELADA".equalsIgnoreCase(reserva.getEstado())) {
+            throw new IllegalStateException("La reserva ya se encuentra cancelada");
         }
 
         reserva.setEstado("CANCELADA");
