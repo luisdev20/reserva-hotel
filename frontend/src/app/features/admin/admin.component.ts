@@ -2,9 +2,9 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ReservaService } from '../../services/reserva.service';
-import { AuthService } from '../../services/auth.service';
-import { Categoria, Reserva, Servicio } from '../../models/models';
+import { ReservaService } from '../../core/services/reserva.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Categoria, Reserva, Servicio } from '../../core/models/models';
 
 @Component({
   selector: 'app-admin',

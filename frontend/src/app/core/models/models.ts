@@ -1,4 +1,7 @@
-// Modelos e interfaces TypeScript para Andes Suites
+// Modelos e interfaces TypeScript compartidos por toda la aplicación.
+
+export type Rol = 'ADMIN' | 'CLIENTE';
+export type EstadoReserva = 'CONFIRMADA' | 'CANCELADA';
 
 export interface Usuario {
   id?: number;
@@ -6,7 +9,7 @@ export interface Usuario {
   apellido?: string;
   email: string;
   telefono?: string;
-  rol: 'ADMIN' | 'CLIENTE';
+  rol: Rol;
 }
 
 export interface Categoria {
@@ -38,7 +41,7 @@ export interface Reserva {
   fechaEntrada: string;
   fechaSalida: string;
   total?: number;
-  estado?: string;
+  estado?: EstadoReserva;
   notas?: string;
   fechaCreacion?: string;
 }
@@ -49,6 +52,28 @@ export interface AuthResponse {
   email: string;
   nombre: string;
   apellido?: string;
-  rol: 'ADMIN' | 'CLIENTE';
+  rol: Rol;
   mensaje?: string;
+}
+
+// Contratos de entrada de la API REST.
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegistroRequest {
+  nombre: string;
+  apellido?: string;
+  email: string;
+  telefono?: string;
+  password: string;
+  rol: Rol;
+}
+
+export interface CrearReservaRequest {
+  servicioId: number;
+  fechaEntrada: string;
+  fechaSalida: string;
+  notas?: string;
 }

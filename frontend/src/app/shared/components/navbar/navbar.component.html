@@ -1,0 +1,49 @@
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a routerLink="/" class="logo" (click)="cerrarMenu()" aria-label="Andes Suites, ir al inicio">
+      <img src="assets/img/logo.svg" alt="Andes Suites">
+    </a>
+
+    <button
+      type="button"
+      class="menu-toggle"
+      (click)="alternarMenu()"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-controls="menu-principal"
+      aria-label="Abrir o cerrar menú de navegación">
+      <i class="fa-solid" [class.fa-bars]="!menuAbierto()" [class.fa-xmark]="menuAbierto()"></i>
+    </button>
+
+    <nav id="menu-principal" class="nav-links" [class.nav-open]="menuAbierto()" aria-label="Navegación principal">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMenu()">
+        Inicio / Suites
+      </a>
+
+      @if (authService.isLoggedIn() && !authService.isAdmin()) {
+        <a routerLink="/mis-reservas" routerLinkActive="active" (click)="cerrarMenu()">Mis reservas</a>
+      }
+
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active" (click)="cerrarMenu()">Panel admin</a>
+      }
+    </nav>
+
+    <div class="nav-cta">
+      @if (!authService.isLoggedIn()) {
+        <a routerLink="/login" class="btn btn-outline btn-sm" (click)="cerrarMenu()">Iniciar sesión</a>
+      } @else {
+        <div class="nav-user">
+          <i class="fa-regular fa-circle-user"></i>
+          <span class="user-name">{{ authService.usuario()?.nombre }}</span>
+          @if (authService.isAdmin()) {
+            <span class="role-badge">Admin</span>
+          }
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" (click)="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span class="logout-text">Salir</span>
+        </button>
+      }
+    </div>
+  </div>
+</header>

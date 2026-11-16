@@ -1,6 +1,8 @@
+<a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+
 <app-navbar></app-navbar>
 
-<main style="flex:1">
+<main id="contenido" class="app-main">
   <router-outlet></router-outlet>
 </main>
 
@@ -9,8 +11,10 @@
     <div>
       <strong>Andes Suites</strong> &mdash; Hospedaje de altura en el corazón de los Andes
     </div>
-    <div style="font-size:12.5px;color:var(--stone)">
+    <div class="footer-copy">
       &copy; 2026 Andes Suites. Todos los derechos reservados.
     </div>
   </div>
 </footer>
+
+<app-toast></app-toast>

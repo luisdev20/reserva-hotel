@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-registro',
@@ -90,7 +90,7 @@ export class RegistroComponent {
       email: this.email,
       telefono: this.telefono,
       password: this.password,
-      rol: 'CLIENTE'
+      rol: 'CLIENTE' as const
     };
 
     this.authService.register(payload).subscribe({

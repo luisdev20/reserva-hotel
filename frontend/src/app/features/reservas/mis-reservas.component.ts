@@ -1,9 +1,9 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { ReservaService } from '../../services/reserva.service';
-import { AuthService } from '../../services/auth.service';
-import { Reserva } from '../../models/models';
+import { ReservaService } from '../../core/services/reserva.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Reserva } from '../../core/models/models';
 
 @Component({
   selector: 'app-mis-reservas',

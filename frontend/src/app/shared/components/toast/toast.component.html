@@ -1,0 +1,20 @@
+<div class="toast-stack" aria-live="polite">
+  @for (toast of toasts(); track toast.id) {
+    <div
+      class="toast"
+      [class.toast-success]="toast.tipo === 'success'"
+      [class.toast-error]="toast.tipo === 'error'"
+      [class.toast-info]="toast.tipo === 'info'"
+      role="status">
+      <i
+        class="fa-solid"
+        [class.fa-circle-check]="toast.tipo === 'success'"
+        [class.fa-circle-exclamation]="toast.tipo === 'error'"
+        [class.fa-circle-info]="toast.tipo === 'info'"></i>
+      <span>{{ toast.mensaje }}</span>
+      <button type="button" class="toast-close" (click)="cerrar(toast.id)" aria-label="Cerrar notificación">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  }
+</div>
