@@ -1,0 +1,27 @@
+.reservas-page {
+  padding: 38px 0 60px;
+  background: var(--cream);
+  min-height: calc(100vh - 150px);
+}
+
+.reservas-page .alert {
+  margin-top: 16px;
+}
+
+.reservas-page .alert .btn {
+  margin-left: auto;
+}
+
+@media (max-width: 780px) {
+  .reservas-page {
+    padding: 26px 0 46px;
+  }
+
+  .reservas-page .alert {
+    flex-wrap: wrap;
+  }
+
+  .reservas-page .alert .btn {
+    margin-left: 0;
+  }
+}
