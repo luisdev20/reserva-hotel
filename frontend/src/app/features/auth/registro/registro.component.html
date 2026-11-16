@@ -1,0 +1,130 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="assets/img/logo.svg" alt="Andes Suites">
+      <p>Crear nueva cuenta</p>
+    </div>
+
+    <h1>Registro de cliente</h1>
+    <p class="auth-subtitle">Completa tus datos para reservar suites en línea.</p>
+
+    <form [formGroup]="form" (ngSubmit)="registrar()" novalidate>
+      <div class="form-grid-2">
+        <div class="field">
+          <label for="registro-nombre">Nombre</label>
+          <input id="registro-nombre" type="text" formControlName="nombre" autocomplete="given-name" placeholder="Carlos">
+          @if (nombre.invalid && (nombre.touched || enviado)) {
+            <p class="field-error">
+              @if (nombre.hasError('required')) {
+                El nombre es obligatorio.
+              } @else if (nombre.hasError('minlength')) {
+                Usa al menos 2 caracteres.
+              } @else {
+                Ingresa solo letras y espacios.
+              }
+            </p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="registro-apellido">Apellido (opcional)</label>
+          <input id="registro-apellido" type="text" formControlName="apellido" autocomplete="family-name" placeholder="Mendoza">
+          @if (apellido.invalid && apellido.touched) {
+            <p class="field-error">Ingresa solo letras y espacios.</p>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="registro-email">Correo electrónico</label>
+        <input id="registro-email" type="email" formControlName="email" autocomplete="email" placeholder="correo@ejemplo.com">
+        @if (email.invalid && (email.touched || enviado)) {
+          <p class="field-error">
+            @if (email.hasError('required')) {
+              El correo es obligatorio.
+            } @else {
+              Ingresa un correo válido.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="registro-telefono">Teléfono (opcional)</label>
+        <input id="registro-telefono" type="tel" formControlName="telefono" autocomplete="tel" placeholder="987654321">
+        @if (telefono.invalid && telefono.touched) {
+          <p class="field-error">El teléfono debe tener 9 dígitos.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="registro-password">Contraseña</label>
+        <div class="input-with-icon">
+          <input
+            id="registro-password"
+            [type]="mostrarPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+            placeholder="Mínimo 6 caracteres">
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="alternarPassword()"
+            [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'">
+            <i class="fa-solid" [class.fa-eye]="!mostrarPassword()" [class.fa-eye-slash]="mostrarPassword()"></i>
+          </button>
+        </div>
+        @if (password.invalid && (password.touched || enviado)) {
+          <p class="field-error">
+            @if (password.hasError('required')) {
+              La contraseña es obligatoria.
+            } @else {
+              La contraseña debe tener al menos 6 caracteres.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="registro-confirmar">Confirmar contraseña</label>
+        <input
+          id="registro-confirmar"
+          [type]="mostrarPassword() ? 'text' : 'password'"
+          formControlName="confirmarPassword"
+          autocomplete="new-password"
+          placeholder="Repite tu contraseña">
+        @if (confirmarPassword.invalid && (confirmarPassword.touched || enviado)) {
+          <p class="field-error">Debes confirmar tu contraseña.</p>
+        }
+        @if (form.hasError('passwordsDistintas') && (confirmarPassword.touched || enviado)) {
+          <p class="field-error">Las contraseñas no coinciden.</p>
+        }
+      </div>
+
+      <label class="checkbox-field">
+        <input type="checkbox" formControlName="aceptaTerminos">
+        <span>Acepto las políticas de reserva y el tratamiento de mis datos personales.</span>
+      </label>
+      @if (aceptaTerminos.invalid && (aceptaTerminos.touched || enviado)) {
+        <p class="field-error terminos-error">Debes aceptar las políticas para continuar.</p>
+      }
+
+      @if (errorMsg()) {
+        <div class="alert alert-error" role="alert">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{ errorMsg() }}</span>
+        </div>
+      }
+
+      <button type="submit" class="btn btn-gold btn-block" [disabled]="cargando()">
+        <i class="fa-solid fa-user-plus"></i>
+        {{ cargando() ? 'Registrando...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      ¿Ya tienes una cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,108 @@
+.auth-page {
+  min-height: calc(100vh - 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--night) url('/assets/img/hero-andes.svg') bottom/cover no-repeat;
+  position: relative;
+}
+
+.auth-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 27, 36, 0.55);
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 34px 36px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.auth-brand img {
+  height: 38px;
+  margin: 0 auto 8px;
+}
+
+.auth-brand p {
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.auth-card h1 {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin-bottom: 20px;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 42px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  color: var(--ink-soft);
+  padding: 4px;
+  line-height: 1;
+}
+
+.password-toggle:hover {
+  color: var(--night);
+}
+
+.terminos-error {
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.auth-switch a {
+  color: var(--gold-2);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .auth-page {
+    padding: 24px 14px;
+  }
+
+  .auth-card {
+    padding: 26px 20px;
+  }
+}

@@ -1,0 +1,93 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="assets/img/logo.svg" alt="Andes Suites">
+      <p>Sistema de reservas</p>
+    </div>
+
+    <h1>Iniciar sesión</h1>
+    <p class="auth-subtitle">Accede para reservar y consultar tus estancias.</p>
+
+    <form [formGroup]="form" (ngSubmit)="iniciarSesion()" novalidate>
+      <div class="field">
+        <label for="login-email">Correo electrónico</label>
+        <div class="input-with-icon">
+          <i class="fa-solid fa-at"></i>
+          <input
+            id="login-email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="correo@ejemplo.com">
+        </div>
+        @if (email.invalid && (email.touched || enviado)) {
+          <p class="field-error">
+            @if (email.hasError('required')) {
+              El correo es obligatorio.
+            } @else {
+              Ingresa un correo válido.
+            }
+          </p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="login-password">Contraseña</label>
+        <div class="input-with-icon">
+          <i class="fa-solid fa-lock"></i>
+          <input
+            id="login-password"
+            [type]="mostrarPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Tu contraseña">
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="alternarPassword()"
+            [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <i class="fa-solid" [class.fa-eye]="!mostrarPassword()" [class.fa-eye-slash]="mostrarPassword()"></i>
+          </button>
+        </div>
+        @if (password.invalid && (password.touched || enviado)) {
+          <p class="field-error">
+            @if (password.hasError('required')) {
+              La contraseña es obligatoria.
+            } @else {
+              La contraseña debe tener al menos 6 caracteres.
+            }
+          </p>
+        }
+      </div>
+
+      @if (errorMsg()) {
+        <div class="alert alert-error" role="alert">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>{{ errorMsg() }}</span>
+        </div>
+      }
+
+      <button type="submit" class="btn btn-gold btn-block" [disabled]="cargando()">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <div class="demo-box">
+      <p>Credenciales de prueba</p>
+      <div class="demo-actions">
+        <button type="button" class="btn btn-outline-dark btn-sm" (click)="usarCredenciales('admin')">
+          Administrador
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm" (click)="usarCredenciales('cliente')">
+          Cliente
+        </button>
+      </div>
+    </div>
+
+    <p class="auth-switch">
+      ¿No tienes cuenta?
+      <a routerLink="/registro">Regístrate aquí</a>
+    </p>
+  </div>
+</div>
