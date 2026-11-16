@@ -1,5 +1,6 @@
 package sistemaReserva.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.h2.server.web.JakartaWebServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -16,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,6 +68,14 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 // Sesiones sin estado (Stateless) porque usamos JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Respuestas JSON uniformes para sesión ausente o permisos insuficientes
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                escribirError(response, HttpServletResponse.SC_UNAUTHORIZED,
+                                        "No autenticado. Inicia sesión para continuar."))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                escribirError(response, HttpServletResponse.SC_FORBIDDEN,
+                                        "No tienes permisos para realizar esta acción.")))
                 // Reglas de autorización
                 .authorizeHttpRequests(auth -> auth
                         // Rutas públicas de autenticación y consola H2
@@ -89,5 +99,13 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // Escribe una respuesta JSON simple para los errores de seguridad.
+    private void escribirError(HttpServletResponse response, int status, String mensaje) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"error\":\"" + mensaje + "\"}");
     }
 }
