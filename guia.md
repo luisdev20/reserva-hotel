@@ -32,6 +32,8 @@ src/main/java/sistemaReserva/
 │   ├── ServicioController.java       # CRUD completo de servicios y suites (GET, POST, PUT, DELETE)
 │   ├── ReservaController.java        # POST /reservas, GET /mis-reservas, GET /reservas, PUT /cancelar
 │   └── CategoriaController.java      # GET /categorias
+├── exception/
+│   └── GlobalExceptionHandler.java   # Errores de validación en formato JSON uniforme
 ├── dto/
 │   ├── AuthResponseDTO.java          # Datos devueltos tras login/registro + JWT
 │   ├── LoginRequestDTO.java          # Credenciales de inicio de sesión
@@ -62,16 +64,19 @@ src/main/java/sistemaReserva/
 
 ---
 
-## 3. ESTRUCTURA DEL FRONTEND (ANGULAR)
+## 3. ESTRUCTURA DEL FRONTEND (ANGULAR 21)
 
 Ubicado en la carpeta `/frontend`:
 - **Estilo**: Basado 100% en el diseño de Andes Suites (`plantilla_estilo`), con paleta de colores cordilleranos (`--night: #1B2430`, `--cream: #F5F1E8`, `--gold: #C9A66B`) y tipografía Google Fonts (*Fraunces* y *Work Sans*).
-- **Rutas y Componentes**:
-  - `/` (`CatalogoComponent`): Muestra el Hero banner, las tarjetas de suites, el filtro interactivo por precio máximo consumiendo la consulta JPQL del backend, y modal para realizar reservas.
-  - `/login` (`LoginComponent`): Formulario idéntico al prototipo con selector de rol para cargar rápidamente credenciales de Admin o Huésped.
-  - `/registro` (`RegistroComponent`): Formulario para crear un nuevo cliente.
-  - `/admin` (`AdminComponent`): Panel de control para el Administrador con métricas KPI, CRUD completo de servicios (crear, editar, eliminar con modal), listado de reservas y listado de usuarios.
-  - `/mis-reservas` (`MisReservasComponent`): Panel para que el cliente consulte sus reservas y pueda cancelarlas.
+- **Organización**: componentes standalone separados en `core` (modelos, servicios, guards, interceptores y validadores), `shared` (navbar y notificaciones) y `features` (catálogo, autenticación, reservas y admin).
+- **Rutas y Componentes** (con lazy loading):
+  - `/` (`CatalogoComponent`): Hero banner, tarjetas de suites, filtro por precio máximo contra la consulta JPQL y modal de reserva con formulario reactivo.
+  - `/login` (`LoginComponent`): Inicio de sesión con validaciones y botones para cargar credenciales de prueba. Ruta protegida por `guestGuard`.
+  - `/registro` (`RegistroComponent`): Registro de cliente con confirmación de contraseña y aceptación de términos. Ruta protegida por `guestGuard`.
+  - `/admin` (`AdminComponent`): Panel del administrador con KPIs, CRUD de servicios, reservas y usuarios. Ruta protegida por `adminGuard`.
+  - `/mis-reservas` (`MisReservasComponent`): Reservas del cliente y cancelación. Ruta protegida por `authGuard`.
+  - `**` (`NotFoundComponent`): Página 404.
+- **Comunicación HTTP**: `HttpClient` tipado, URL centralizada en `environments/environment.ts`, interceptor JWT y interceptor global de errores.
 
 ---
 
@@ -161,6 +166,12 @@ Ubicado en la carpeta `/frontend`:
        "notas": "Cama adicional si es posible"
      }
      ```
+
+   **Reglas aplicadas por el backend:**
+   - La fecha de entrada no puede ser anterior a hoy.
+   - La fecha de salida debe ser posterior a la entrada.
+   - No se permite una reserva que se cruce con otra reserva activa de la misma suite (control de sobreventa).
+   - Si hay solapamiento, responde `400` con `{"error":"La suite ya está reservada..."}`.
 
 2. **Consultar mis reservas (Cliente):**
    - `GET http://localhost:8080/api/reservas/mis-reservas`

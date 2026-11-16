@@ -1,6 +1,10 @@
 # Sistema de Reservas — Andes Suites
 
-Aplicación web para la gestión de reservas hoteleras, desarrollada con **Spring Boot** (backend) y **Angular** (frontend).
+Aplicación web para la gestión de reservas hoteleras, desarrollada con **Spring Boot** (backend REST) y **Angular** (frontend SPA).
+
+El sistema permite consultar suites y servicios, filtrar por precio, registrar usuarios, reservar con validación de fechas y disponibilidad, cancelar reservas y administrar el catálogo desde un panel con roles.
+
+> Documentación de estudio y sustento de la rúbrica: [`DOCUMENTACION_RUBRICA.md`](./DOCUMENTACION_RUBRICA.md)
 
 ---
 
@@ -12,7 +16,7 @@ Aplicación web para la gestión de reservas hoteleras, desarrollada con **Sprin
 | Maven | Incluido (`mvnw`) |
 | Node.js | 18+ |
 | npm | 9+ |
-| Angular CLI | 17+ |
+| Angular CLI | 21+ |
 
 ---
 
@@ -20,20 +24,27 @@ Aplicación web para la gestión de reservas hoteleras, desarrollada con **Sprin
 
 ```
 sistemaReserva/
-├── src/                        # Backend Spring Boot
+├── src/                                  # Backend Spring Boot
 │   └── main/java/sistemaReserva/
-│       ├── controller/         # Endpoints REST
-│       ├── service/            # Lógica de negocio
-│       ├── repository/         # Acceso a base de datos (JPA)
-│       ├── model/              # Entidades JPA
-│       ├── dto/                # Objetos de transferencia de datos
-│       ├── security/           # JWT y Spring Security
-│       └── config/             # Inicialización de datos
-├── frontend/                   # Frontend Angular
-│   └── src/app/
-│       ├── components/         # Vistas (login, catálogo, admin, etc.)
-│       ├── services/           # Servicios HTTP hacia el backend
-│       └── models/             # Interfaces TypeScript
+│       ├── controller/                   # Endpoints REST
+│       ├── service/                      # Lógica de negocio
+│       ├── repository/                   # Acceso a datos (JPA + JPQL)
+│       ├── model/                        # Entidades JPA
+│       ├── dto/                          # Objetos de transferencia
+│       ├── security/                     # JWT, filtros y roles
+│       ├── exception/                    # Manejo global de errores
+│       └── config/                       # Datos iniciales
+├── frontend/                             # Frontend Angular 21
+│   └── src/
+│       ├── app/
+│       │   ├── core/                     # Modelos, servicios, guards, interceptores y validadores
+│       │   ├── shared/                   # Navbar y notificaciones reutilizables
+│       │   ├── features/                 # Catálogo, autenticación, reservas y admin
+│       │   ├── app.routes.ts             # Rutas con lazy loading y guards
+│       │   └── app.config.ts             # Providers globales
+│       ├── environments/                 # URL centralizada de la API
+│       └── styles.css                    # Sistema de diseño global
+├── DOCUMENTACION_RUBRICA.md              # Guía de estudio y exposición
 └── pom.xml
 ```
 
@@ -56,11 +67,11 @@ cd reserva-hotel
 
 El servidor arranca en `http://localhost:8080`.
 
-> La base de datos H2 es **en memoria**: se crea automáticamente al iniciar y se puebla con datos de prueba. No requiere ninguna instalación adicional.
+> La base de datos H2 es **en memoria**: se crea automáticamente al iniciar y se puebla con datos de prueba. No requiere instalación adicional. Cada reinicio restaura los datos iniciales.
 
 ### 3. Ejecutar el frontend (Angular)
 
-Abre una segunda terminal:
+En una segunda terminal:
 
 ```bash
 cd frontend
@@ -70,13 +81,22 @@ npm start
 
 La aplicación queda disponible en `http://localhost:4200`.
 
+### 4. Ejecutar las pruebas
+
+```bash
+# Backend (8 pruebas de integración)
+./mvnw test
+
+# Frontend (2 pruebas de la aplicación Angular)
+cd frontend
+npx ng test --watch=false
+```
+
 ---
 
 ## Configuración
 
 El backend se configura en `src/main/resources/application.properties`.
-
-Los valores que debes ajustar si cambias de entorno:
 
 | Propiedad | Descripción |
 |---|---|
@@ -84,7 +104,16 @@ Los valores que debes ajustar si cambias de entorno:
 | `app.jwt.secret` | Clave secreta para firmar tokens JWT |
 | `app.jwt.expiration-ms` | Duración del token en milisegundos |
 
-> **No compartas** el valor de `app.jwt.secret` en repositorios públicos. En producción, usa variables de entorno.
+El frontend centraliza la URL del backend en `frontend/src/environments/environment.ts`:
+
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080/api'
+};
+```
+
+> **No compartas** el valor real de `app.jwt.secret` en repositorios públicos. En producción, usa variables de entorno.
 
 ### Migrar a MySQL (opcional)
 
@@ -92,7 +121,7 @@ Comenta las líneas de H2 en `application.properties` y descomenta las de MySQL 
 
 ---
 
-## Credenciales de prueba (solo entorno de desarrollo)
+## Credenciales de prueba (solo desarrollo)
 
 | Rol | Correo | Contraseña |
 |---|---|---|
@@ -103,37 +132,76 @@ Comenta las líneas de H2 en `application.properties` y descomenta las de MySQL 
 
 ---
 
+## Rutas del frontend
+
+| Ruta | Componente | Acceso |
+|---|---|---|
+| `/` | Catálogo de suites | Público |
+| `/login` | Inicio de sesión | Solo visitantes |
+| `/registro` | Registro de cliente | Solo visitantes |
+| `/mis-reservas` | Reservas del cliente | Sesión activa |
+| `/admin` | Panel administrativo | Solo `ADMIN` |
+| `**` | Página no encontrada | Público |
+
+Las rutas usan **lazy loading**, títulos por página y guards (`authGuard`, `adminGuard`, `guestGuard`).
+
+---
+
 ## Endpoints principales
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
 | `POST` | `/api/auth/register` | Registrar usuario | Público |
 | `POST` | `/api/auth/login` | Iniciar sesión | Público |
+| `GET` | `/api/auth/perfil` | Perfil del usuario autenticado | Sesión |
+| `GET` | `/api/auth/usuarios` | Listar usuarios | Admin |
 | `GET` | `/api/servicios` | Listar suites/servicios | Público |
-| `GET` | `/api/servicios/disponibles` | Solo disponibles | Público |
-| `GET` | `/api/servicios/precio?max={n}` | Filtrar por precio | Público |
+| `GET` | `/api/servicios/buscar?precioMax={n}` | Filtrar por precio (JPQL) | Público |
+| `GET` | `/api/servicios/{id}` | Detalle de un servicio | Público |
 | `POST` | `/api/servicios` | Crear servicio | Admin |
 | `PUT` | `/api/servicios/{id}` | Actualizar servicio | Admin |
 | `DELETE` | `/api/servicios/{id}` | Eliminar servicio | Admin |
-| `POST` | `/api/reservas` | Crear reserva | Cliente |
-| `GET` | `/api/reservas/mis-reservas` | Ver propias reservas | Cliente |
-| `GET` | `/api/reservas` | Ver todas las reservas | Admin |
-| `PATCH` | `/api/reservas/{id}/cancelar` | Cancelar reserva | Admin/Cliente |
+| `GET` | `/api/categorias` | Listar categorías | Público |
+| `POST` | `/api/reservas` | Crear reserva | Sesión |
+| `GET` | `/api/reservas/mis-reservas` | Reservas propias | Sesión |
+| `GET` | `/api/reservas` | Todas las reservas | Admin |
+| `PUT` | `/api/reservas/{id}/cancelar` | Cancelar reserva | Dueño o admin |
+
+### Reglas de negocio de las reservas
+
+- La fecha de entrada no puede ser anterior a hoy.
+- La fecha de salida debe ser posterior a la entrada.
+- No se permite reservar una suite que se cruce con otra reserva activa (control de sobreventa).
+- Una reserva cancelada libera el rango de fechas.
+- No se puede cancelar dos veces la misma reserva.
+- El total se calcula en el backend: `noches × precio de la suite`.
+
+Los errores se devuelven como JSON uniforme:
+
+```json
+{ "error": "La suite ya está reservada en el rango de fechas seleccionado. Elige otras fechas." }
+```
+
+Las respuestas de seguridad también son JSON: `401` para sesión ausente o expirada y `403` para permisos insuficientes.
 
 ---
 
 ## Tecnologías utilizadas
 
 **Backend**
-- Spring Boot 3
+- Spring Boot 4
 - Spring Security + JWT
 - Spring Data JPA / Hibernate
+- Bean Validation
 - Base de datos H2 (en memoria)
 
 **Frontend**
-- Angular 17 (standalone components)
+- Angular 21 con componentes standalone
 - TypeScript
-- CSS personalizado
+- Reactive Forms
+- Signals
+- HttpClient + interceptores funcionales
+- CSS personalizado responsive
 
 ---
 
