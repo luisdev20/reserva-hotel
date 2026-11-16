@@ -33,13 +33,13 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
+    this.eliminarDelStorage(this.tokenKey);
+    this.eliminarDelStorage(this.userKey);
     this._usuario.set(null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return this.leerDelStorage(this.tokenKey);
   }
 
   getCurrentUser(): AuthResponse | null {
@@ -51,14 +51,14 @@ export class AuthService {
   }
 
   private guardarSesion(respuesta: AuthResponse): void {
-    localStorage.setItem(this.tokenKey, respuesta.token);
-    localStorage.setItem(this.userKey, JSON.stringify(respuesta));
+    this.guardarEnStorage(this.tokenKey, respuesta.token);
+    this.guardarEnStorage(this.userKey, JSON.stringify(respuesta));
     this._usuario.set(respuesta);
   }
 
   private leerUsuario(): AuthResponse | null {
-    const token = localStorage.getItem(this.tokenKey);
-    const datos = localStorage.getItem(this.userKey);
+    const token = this.leerDelStorage(this.tokenKey);
+    const datos = this.leerDelStorage(this.userKey);
     if (!token || !datos) {
       return null;
     }
@@ -66,9 +66,34 @@ export class AuthService {
     try {
       return JSON.parse(datos) as AuthResponse;
     } catch {
-      localStorage.removeItem(this.tokenKey);
-      localStorage.removeItem(this.userKey);
+      this.eliminarDelStorage(this.tokenKey);
+      this.eliminarDelStorage(this.userKey);
       return null;
+    }
+  }
+
+  // Métodos seguros para entornos sin localStorage (pruebas o SSR).
+  private leerDelStorage(clave: string): string | null {
+    try {
+      return localStorage.getItem(clave);
+    } catch {
+      return null;
+    }
+  }
+
+  private guardarEnStorage(clave: string, valor: string): void {
+    try {
+      localStorage.setItem(clave, valor);
+    } catch {
+      // Si el navegador bloquea el almacenamiento, la sesión sigue en memoria.
+    }
+  }
+
+  private eliminarDelStorage(clave: string): void {
+    try {
+      localStorage.removeItem(clave);
+    } catch {
+      // No hay nada que limpiar si el almacenamiento no está disponible.
     }
   }
 }
