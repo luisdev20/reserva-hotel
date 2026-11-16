@@ -16,6 +16,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     // Consulta derivada por id de usuario
     List<Reserva> findByUsuarioId(Long usuarioId);
 
+    // Consulta derivada: verifica si un servicio ya tiene reservas asociadas
+    boolean existsByServicioId(Long servicioId);
+
     // Consulta JPQL: cuenta reservas activas que se cruzan con el rango solicitado.
     // Dos rangos se solapan cuando la entrada existente es anterior a la salida nueva
     // y la salida existente es posterior a la entrada nueva.

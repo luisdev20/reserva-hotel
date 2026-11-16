@@ -86,6 +86,8 @@ public class ServicioController {
             return ResponseEntity.ok(Map.of("mensaje", "Servicio eliminado exitosamente"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
         }
     }
 }

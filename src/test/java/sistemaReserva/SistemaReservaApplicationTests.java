@@ -79,6 +79,25 @@ class SistemaReservaApplicationTests {
     }
 
     @Test
+    void testRegistroPublicoNoPermiteCrearAdmin() {
+        RegisterRequestDTO intento = new RegisterRequestDTO(
+                "Intruso",
+                "Prueba",
+                "intruso@example.com",
+                "password123",
+                "999999999",
+                "ADMIN"
+        );
+
+        ResponseEntity<?> response = authController.register(intento);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        AuthResponseDTO body = (AuthResponseDTO) response.getBody();
+        assertNotNull(body);
+        assertEquals("CLIENTE", body.getRol());
+    }
+
+    @Test
     void testPerfilConToken() {
         // Simular autenticación en SecurityContext
         SecurityContextHolder.getContext().setAuthentication(
@@ -134,6 +153,16 @@ class SistemaReservaApplicationTests {
 
         assertThrows(IllegalStateException.class,
                 () -> reservaService.crearReserva("cliente@andessuites.com", solicitud));
+    }
+
+    @Test
+    void testNoPermiteEliminarServicioConReservas() {
+        Servicio suiteAndina = servicioRepository.findAll().stream()
+                .filter(s -> s.getNombre().contains("Andina"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThrows(IllegalStateException.class, () -> servicioService.eliminar(suiteAndina.getId()));
     }
 
     @Test

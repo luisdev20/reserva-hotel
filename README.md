@@ -84,7 +84,7 @@ La aplicación queda disponible en `http://localhost:4200`.
 ### 4. Ejecutar las pruebas
 
 ```bash
-# Backend (8 pruebas de integración)
+# Backend (10 pruebas de integración)
 ./mvnw test
 
 # Frontend (2 pruebas de la aplicación Angular)
@@ -175,6 +175,8 @@ Las rutas usan **lazy loading**, títulos por página y guards (`authGuard`, `ad
 - Una reserva cancelada libera el rango de fechas.
 - No se puede cancelar dos veces la misma reserva.
 - El total se calcula en el backend: `noches × precio de la suite`.
+- Un servicio con reservas asociadas no se puede eliminar; se debe marcar como no disponible.
+- El registro público siempre crea usuarios con rol `CLIENTE`.
 
 Los errores se devuelven como JSON uniforme:
 

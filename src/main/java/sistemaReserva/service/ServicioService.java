@@ -6,6 +6,7 @@ import sistemaReserva.dto.ServicioDTO;
 import sistemaReserva.model.Categoria;
 import sistemaReserva.model.Servicio;
 import sistemaReserva.repository.CategoriaRepository;
+import sistemaReserva.repository.ReservaRepository;
 import sistemaReserva.repository.ServicioRepository;
 
 import java.util.List;
@@ -20,6 +21,9 @@ public class ServicioService {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private ReservaRepository reservaRepository;
 
     // Listar todos los servicios
     public List<ServicioDTO> listarTodos() {
@@ -102,6 +106,14 @@ public class ServicioService {
         if (!servicioRepository.existsById(id)) {
             throw new IllegalArgumentException("No se puede eliminar: servicio no encontrado con ID: " + id);
         }
+
+        // Protege el historial: no se elimina una suite que ya tiene reservas.
+        if (reservaRepository.existsByServicioId(id)) {
+            throw new IllegalStateException(
+                    "No se puede eliminar el servicio porque tiene reservas asociadas. " +
+                    "Márcalo como no disponible en su lugar.");
+        }
+
         servicioRepository.deleteById(id);
     }
 

@@ -30,16 +30,20 @@ public class UsuarioService {
 
     // Registro de un nuevo usuario
     public AuthResponseDTO registrar(RegisterRequestDTO dto) {
-        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+        String email = dto.getEmail().trim().toLowerCase();
+
+        if (usuarioRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("El correo ya se encuentra registrado");
         }
 
-        String rol = (dto.getRol() == null || dto.getRol().isBlank()) ? "CLIENTE" : dto.getRol().toUpperCase();
+        // El registro público siempre crea clientes. Los administradores
+        // solo se crean desde la carga inicial o por un proceso interno.
+        String rol = "CLIENTE";
 
         Usuario nuevoUsuario = new Usuario(
-                dto.getNombre(),
+                dto.getNombre().trim(),
                 dto.getApellido(),
-                dto.getEmail(),
+                email,
                 passwordEncoder.encode(dto.getPassword()),
                 dto.getTelefono(),
                 rol
@@ -61,7 +65,8 @@ public class UsuarioService {
 
     // Inicio de sesión y verificación de credenciales
     public AuthResponseDTO login(LoginRequestDTO dto) {
-        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(dto.getEmail());
+        String email = dto.getEmail().trim().toLowerCase();
+        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(email);
 
         if (optUsuario.isEmpty() || !passwordEncoder.matches(dto.getPassword(), optUsuario.get().getPassword())) {
             throw new IllegalArgumentException("Credenciales incorrectas (correo o contraseña)");

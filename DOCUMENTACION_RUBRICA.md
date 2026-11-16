@@ -53,7 +53,7 @@ npx ng test --watch=false
 
 Resultado esperado:
 
-- Backend: 8 pruebas aprobadas.
+- Backend: 10 pruebas aprobadas.
 - Frontend: 2 pruebas aprobadas.
 
 ### Credenciales de prueba
@@ -417,6 +417,7 @@ Ventaja: ningún componente repite la cabecera `Authorization`.
 - `401`: sesión ausente o expirada; cierra sesión y redirige al login.
 - `403`: el usuario no tiene permisos.
 - `404`: recurso no encontrado.
+- `409`: conflicto de negocio, por ejemplo, eliminar una suite con reservas.
 - `500`: mensaje genérico.
 
 El backend responde siempre con la propiedad `error`:
@@ -534,6 +535,7 @@ Controller -> Service -> Repository -> Base de datos
 - `JwtUtil` genera y valida el token.
 - Las contraseñas se guardan con BCrypt.
 - Los roles se usan como `ROLE_ADMIN` y `ROLE_CLIENTE`.
+- El registro público siempre crea usuarios `CLIENTE`; aunque un cliente malicioso envíe `"rol":"ADMIN"`, el backend lo ignora.
 - `401` y `403` se devuelven en JSON.
 
 Flujo de login:
@@ -599,6 +601,7 @@ El frontend muestra ese mensaje dentro del modal, sin cerrarlo, para que el usua
 - Una reserva cancelada ya no bloquea fechas.
 - No se puede cancelar dos veces.
 - Un cliente solo puede cancelar sus propias reservas; el admin puede cancelar cualquiera.
+- No se elimina una suite que ya tiene reservas asociadas; se recomienda marcarla como “No disponible”. El backend responde `409 Conflict` con un mensaje claro.
 
 ### 9.5 Consultas JPQL
 
@@ -736,6 +739,14 @@ En el backend, con la diferencia de días entre entrada y salida multiplicada po
 ### ¿Qué pasa al cancelar una reserva?
 
 Se cambia el estado a `CANCELADA`. La consulta de solapamiento excluye las canceladas, por lo que las fechas quedan libres nuevamente.
+
+### ¿Qué pasa si el administrador intenta eliminar una suite con reservas?
+
+El backend lo bloquea con `409 Conflict` para no romper el historial. La alternativa correcta es marcarla como “No disponible”, lo que impide nuevas reservas sin borrar las existentes.
+
+### ¿Puede un usuario registrarse como administrador enviando un rol distinto?
+
+No. El endpoint público de registro ignora el rol enviado y siempre crea un usuario `CLIENTE`. Los administradores solo se crean desde la carga inicial o un proceso interno.
 
 ### ¿Por qué H2 y no MySQL?
 
