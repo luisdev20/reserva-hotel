@@ -11,6 +11,10 @@
         Explorar suites
         <i class="fa-solid fa-arrow-down"></i>
       </button>
+      <a routerLink="/nosotros" class="btn btn-outline">
+        Nuestra historia
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
     </div>
     <div class="hero-stats">
       <div><strong>4</strong><span>Sedes en la cordillera</span></div>
@@ -28,38 +32,81 @@
       <p>Elige según tu vista, tu espacio y tu ocasión.</p>
     </div>
 
-    <form class="filter-bar" [formGroup]="filtroForm" (ngSubmit)="filtrarPorPrecio()">
-      <div class="filter-controls">
-        <label for="filtro-precio">
-          <i class="fa-solid fa-sliders"></i>
-          Precio máximo por noche
-        </label>
-        <input
-          id="filtro-precio"
-          type="number"
-          formControlName="precioMax"
-          min="1"
-          step="50"
-          placeholder="Ej. 500">
-        <button type="submit" class="btn btn-gold btn-sm">Filtrar</button>
-        @if (filtroAplicado()) {
-          <button type="button" class="btn btn-outline-dark btn-sm" (click)="limpiarFiltro()">
-            Ver todos
-          </button>
-        }
+    <form class="filter-bar" [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" novalidate>
+      <div class="filter-heading">
+        <div>
+          <span class="filter-eyebrow"><i class="fa-solid fa-sliders"></i> Filtros</span>
+          <h3>Busca disponibilidad real</h3>
+        </div>
+        <span class="filter-count">
+          Mostrando <strong>{{ servicios().length }}</strong> opciones
+        </span>
       </div>
-      <span class="filter-count">
-        Mostrando <strong>{{ servicios().length }}</strong> opciones
-      </span>
-      @if (filtroForm.controls.precioMax.invalid && filtroForm.controls.precioMax.touched) {
+
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label for="filtro-entrada">Entrada</label>
+          <input id="filtro-entrada" type="date" formControlName="fechaEntrada" [min]="hoyISO">
+        </div>
+
+        <div class="filter-field">
+          <label for="filtro-salida">Salida</label>
+          <input
+            id="filtro-salida"
+            type="date"
+            formControlName="fechaSalida"
+            [min]="fechaEntradaFiltro.value || hoyISO">
+        </div>
+
+        <div class="filter-field">
+          <label for="filtro-precio">Precio máximo / noche</label>
+          <input
+            id="filtro-precio"
+            type="number"
+            formControlName="precioMax"
+            min="1"
+            step="50"
+            placeholder="Ej. 500">
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-gold">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            Buscar disponibles
+          </button>
+          @if (filtroAplicado()) {
+            <button type="button" class="btn btn-outline-dark" (click)="limpiarFiltro()">
+              Limpiar
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (filtroForm.hasError('fechaPasada') && (fechaEntradaFiltro.touched || fechaSalidaFiltro.touched)) {
+        <p class="field-error filter-error">La fecha de entrada no puede ser anterior a hoy.</p>
+      }
+      @if (filtroForm.hasError('rangoInvalido') && (fechaEntradaFiltro.touched || fechaSalidaFiltro.touched)) {
+        <p class="field-error filter-error">La fecha de salida debe ser posterior a la fecha de entrada.</p>
+      }
+      @if (precioMax.invalid && precioMax.touched) {
         <p class="field-error filter-error">El precio debe ser mayor que cero.</p>
+      }
+      @if (errorFiltro()) {
+        <p class="field-error filter-error">{{ errorFiltro() }}</p>
+      }
+
+      @if (filtroAplicado() && filtroResumen()) {
+        <p class="filter-summary">
+          <i class="fa-solid fa-circle-check"></i>
+          {{ filtroResumen() }}
+        </p>
       }
     </form>
 
     @if (cargando()) {
       <div class="loading-state">
         <span class="spinner"></span>
-        <p>Cargando suites disponibles...</p>
+        <p>Buscando suites disponibles...</p>
       </div>
     }
 
@@ -75,9 +122,11 @@
 
     @if (!cargando() && !errorCarga() && servicios().length === 0) {
       <div class="empty-state">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <h3>No se encontraron suites con ese precio</h3>
-        <p>Prueba con un monto mayor o vuelve a ver todas las opciones disponibles.</p>
+        <i class="fa-solid fa-calendar-xmark"></i>
+        <h3>No encontramos opciones con esos filtros</h3>
+        <p>
+          Prueba con otras fechas, un precio mayor o vuelve a ver todas las suites disponibles.
+        </p>
         <button type="button" class="btn btn-gold btn-sm" (click)="limpiarFiltro()">
           Ver todas las suites
         </button>
@@ -87,32 +136,7 @@
     @if (!cargando() && servicios().length > 0) {
       <div class="suites-grid">
         @for (servicio of servicios(); track servicio.id) {
-          <article class="suite-card">
-            <div class="card-top">
-              <span class="tag">{{ servicio.categoriaNombre || 'Hospedaje' }}</span>
-              @if (!servicio.disponible) {
-                <span class="badge badge-inactive">No disponible</span>
-              }
-            </div>
-            <h3>{{ servicio.nombre }}</h3>
-            <p>{{ servicio.descripcion }}</p>
-            <div class="card-meta">
-              <i class="fa-solid fa-user-group"></i>
-              Capacidad: {{ servicio.capacidad }} personas
-            </div>
-            <div class="card-footer">
-              <div class="price">
-                S/ {{ servicio.precio }} <span>/ noche</span>
-              </div>
-              <button
-                type="button"
-                class="btn btn-gold btn-sm"
-                [disabled]="!servicio.disponible"
-                (click)="abrirModalReserva(servicio)">
-                {{ servicio.disponible ? 'Reservar' : 'No disponible' }}
-              </button>
-            </div>
-          </article>
+          <app-suite-card [servicio]="servicio" (reservar)="abrirReserva($event)"></app-suite-card>
         }
       </div>
     }
@@ -120,78 +144,5 @@
 </section>
 
 @if (servicioSeleccionado(); as servicio) {
-  <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="titulo-reserva" (click)="cerrarModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <h3 id="titulo-reserva">Reservar {{ servicio.nombre }}</h3>
-      <p class="modal-subtitle">
-        Tarifa: <strong>S/ {{ servicio.precio }} por noche</strong>
-      </p>
-
-      <form [formGroup]="reservaForm" (ngSubmit)="confirmarReserva()" novalidate>
-        <div class="form-grid-2">
-          <div class="field">
-            <label for="fecha-entrada">Fecha de entrada</label>
-            <input id="fecha-entrada" type="date" formControlName="fechaEntrada" [min]="hoyISO">
-            @if (fechaEntrada.invalid && (fechaEntrada.touched || enviadoReserva())) {
-              <p class="field-error">La fecha de entrada es obligatoria.</p>
-            }
-            @if (reservaForm.hasError('fechaPasada') && (fechaEntrada.touched || enviadoReserva())) {
-              <p class="field-error">La fecha de entrada no puede ser anterior a hoy.</p>
-            }
-          </div>
-
-          <div class="field">
-            <label for="fecha-salida">Fecha de salida</label>
-            <input id="fecha-salida" type="date" formControlName="fechaSalida" [min]="minSalida()">
-            @if (fechaSalida.invalid && (fechaSalida.touched || enviadoReserva())) {
-              <p class="field-error">La fecha de salida es obligatoria.</p>
-            }
-          </div>
-        </div>
-
-        @if (reservaForm.hasError('rangoInvalido') && (fechaSalida.touched || enviadoReserva())) {
-          <p class="field-error">La fecha de salida debe ser posterior a la fecha de entrada.</p>
-        }
-
-        <div class="reserva-resumen">
-          <div>
-            <span>Noches</span>
-            <strong>{{ noches() }}</strong>
-          </div>
-          <div>
-            <span>Total estimado</span>
-            <strong>S/ {{ totalEstimado() }}</strong>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="reserva-notas">Notas especiales (opcional)</label>
-          <textarea
-            id="reserva-notas"
-            formControlName="notas"
-            maxlength="250"
-            placeholder="Ej: Habitación en piso alto, check-in anticipado..."></textarea>
-          @if (notas.invalid && notas.touched) {
-            <p class="field-error">Máximo 250 caracteres.</p>
-          }
-        </div>
-
-        @if (errorReserva()) {
-          <div class="alert alert-error" role="alert">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>{{ errorReserva() }}</span>
-          </div>
-        }
-
-        <div class="modal-actions">
-          <button type="button" class="btn btn-outline-dark btn-sm" (click)="cerrarModal()">
-            Cancelar
-          </button>
-          <button type="submit" class="btn btn-gold btn-sm" [disabled]="cargandoReserva()">
-            {{ cargandoReserva() ? 'Confirmando...' : 'Confirmar reserva' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <app-reserva-wizard [servicio]="servicio" (cerrar)="cerrarReserva()"></app-reserva-wizard>
 }

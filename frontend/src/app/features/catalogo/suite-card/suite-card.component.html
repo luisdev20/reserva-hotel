@@ -1,0 +1,55 @@
+<article class="suite-card">
+  <div class="media">
+    <div class="track" [style.transform]="'translateX(-' + indice() * 100 + '%)'">
+      @for (imagen of imagenes; track imagen) {
+        <img [src]="imagen" [alt]="'Vista de ' + servicio.nombre" loading="lazy">
+      }
+    </div>
+    <div class="media-shade" aria-hidden="true"></div>
+
+    <span class="tag">{{ servicio.categoriaNombre || 'Hospedaje' }}</span>
+    @if (!servicio.disponible) {
+      <span class="badge badge-inactive media-badge">No disponible</span>
+    }
+
+    <button type="button" class="carousel-btn prev" aria-label="Imagen anterior" (click)="anterior()">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button type="button" class="carousel-btn next" aria-label="Imagen siguiente" (click)="siguiente()">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+
+    <div class="dots" aria-label="Seleccionar imagen">
+      @for (imagen of imagenes; track $index) {
+        <button
+          type="button"
+          class="dot"
+          [class.active]="indice() === $index"
+          [attr.aria-label]="'Ver imagen ' + ($index + 1)"
+          (click)="irA($index)">
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="card-body">
+    <h3>{{ servicio.nombre }}</h3>
+    <p>{{ servicio.descripcion }}</p>
+    <div class="card-meta">
+      <i class="fa-solid fa-user-group"></i>
+      Capacidad: {{ servicio.capacidad }} personas
+    </div>
+    <div class="card-footer">
+      <div class="price">
+        S/ {{ servicio.precio }} <span>/ noche</span>
+      </div>
+      <button
+        type="button"
+        class="btn btn-gold btn-sm"
+        [disabled]="!servicio.disponible"
+        (click)="solicitarReserva()">
+        {{ servicio.disponible ? 'Reservar' : 'No disponible' }}
+      </button>
+    </div>
+  </div>
+</article>

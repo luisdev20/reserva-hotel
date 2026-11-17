@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Categoria, CrearReservaRequest, Reserva, Servicio } from '../models/models';
+import { Categoria, CrearReservaRequest, RangoOcupado, Reserva, Servicio } from '../models/models';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,20 @@ export class ReservaService {
     return this.http.get<Servicio[]>(`${this.apiUrl}/servicios/buscar`, {
       params: { precioMax }
     });
+  }
+
+  // Servicios libres entre dos fechas, con precio máximo opcional.
+  buscarDisponibles(fechaEntrada: string, fechaSalida: string, precioMax?: number | null): Observable<Servicio[]> {
+    const params: Record<string, string | number> = { fechaEntrada, fechaSalida };
+    if (precioMax) {
+      params['precioMax'] = precioMax;
+    }
+    return this.http.get<Servicio[]>(`${this.apiUrl}/servicios/buscar`, { params });
+  }
+
+  // Rangos ocupados de una suite para bloquearlos en el calendario.
+  getFechasOcupadas(servicioId: number): Observable<RangoOcupado[]> {
+    return this.http.get<RangoOcupado[]>(`${this.apiUrl}/servicios/${servicioId}/ocupacion`);
   }
 
   getCategorias(): Observable<Categoria[]> {

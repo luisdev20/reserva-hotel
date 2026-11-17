@@ -1,0 +1,77 @@
+<div class="calendar">
+  <div class="calendar-head">
+    <button
+      type="button"
+      class="month-btn"
+      (click)="mesAnterior()"
+      [disabled]="!puedeRetroceder()"
+      aria-label="Mes anterior">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <strong>{{ etiquetaMes() }}</strong>
+    <button
+      type="button"
+      class="month-btn"
+      (click)="mesSiguiente()"
+      [disabled]="!puedeAvanzar()"
+      aria-label="Mes siguiente">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="weekdays" aria-hidden="true">
+    @for (dia of semana; track dia) {
+      <span>{{ dia }}</span>
+    }
+  </div>
+
+  <div class="days">
+    @for (dia of dias(); track dia.iso) {
+      <button
+        type="button"
+        class="day"
+        [class.otro-mes]="!dia.delMes"
+        [class.pasado]="dia.pasado"
+        [class.ocupado]="dia.ocupado"
+        [class.seleccionado]="dia.seleccionado"
+        [class.en-rango]="dia.enRango"
+        [class.entrada]="dia.esEntrada"
+        [class.salida]="dia.esSalida"
+        [disabled]="!dia.delMes || dia.pasado || dia.ocupado"
+        [attr.aria-label]="etiquetaDia(dia)"
+        (click)="seleccionar(dia)">
+        {{ dia.dia }}
+      </button>
+    }
+  </div>
+
+  <div class="leyenda">
+    <span><i class="dot disponible"></i> Disponible</span>
+    <span><i class="dot ocupado"></i> Ocupado</span>
+    <span><i class="dot seleccion"></i> Tu selección</span>
+  </div>
+
+  @if (entrada()) {
+    <div class="rango-actual">
+      <i class="fa-regular fa-calendar-check"></i>
+      <span>
+        Entrada <strong>{{ formatear(entrada()) }}</strong>
+        @if (salida()) {
+          · Salida <strong>{{ formatear(salida()) }}</strong>
+        } @else {
+          · elige la salida
+        }
+      </span>
+      <button type="button" class="limpiar" (click)="limpiar()">Limpiar</button>
+    </div>
+  } @else {
+    <p class="instruccion">
+      <i class="fa-solid fa-circle-info"></i>
+      Selecciona el día de entrada y luego el de salida. Los días ocupados no se pueden elegir.
+    </p>
+  }
+
+  @if (error()) {
+    <p class="calendar-error" role="alert">{{ error() }}</p>
+  }
+</div>

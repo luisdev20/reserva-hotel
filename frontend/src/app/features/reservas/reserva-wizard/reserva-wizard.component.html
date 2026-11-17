@@ -1,0 +1,345 @@
+<div class="wizard-overlay" role="dialog" aria-modal="true" aria-labelledby="wizard-titulo">
+  <div class="wizard-shell">
+    <aside class="summary-panel">
+      <div class="summary-brand">
+        <img src="assets/img/logo.svg" alt="Andes Suites">
+      </div>
+
+      <div class="summary-photo">
+        <img [src]="imagenPrincipal" [alt]="servicio.nombre">
+        <span>{{ servicio.categoriaNombre || 'Hospedaje' }}</span>
+      </div>
+
+      <h1 id="wizard-titulo">{{ servicio.nombre }}</h1>
+      <p class="summary-desc">{{ servicio.descripcion }}</p>
+
+      <div class="summary-dates">
+        <div>
+          <span>Entrada</span>
+          <strong>{{ formatearFecha(rango()?.entrada) }}</strong>
+        </div>
+        <div>
+          <span>Salida</span>
+          <strong>{{ formatearFecha(rango()?.salida) }}</strong>
+        </div>
+      </div>
+
+      <div class="summary-lines">
+        <div>
+          <span>{{ noches() }} noches × S/ {{ servicio.precio }}</span>
+          <strong>S/ {{ subtotal() }}</strong>
+        </div>
+        <div>
+          <span>Impuestos</span>
+          <strong>Incluidos</strong>
+        </div>
+      </div>
+
+      <div class="summary-total">
+        <span>Total a pagar</span>
+        <strong>S/ {{ total() }}</strong>
+      </div>
+
+      <p class="summary-note">
+        <i class="fa-solid fa-circle-check"></i>
+        Confirmación inmediata. Puedes cancelar desde Mis reservas.
+      </p>
+
+      @if (paso() === 'fechas') {
+        <button
+          type="button"
+          class="btn btn-gold btn-block"
+          [disabled]="!rango() || cargandoOcupados()"
+          (click)="continuarPago()">
+          Continuar al pago
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      }
+
+      @if (paso() === 'pago') {
+        <button type="button" class="btn btn-gold btn-block" (click)="pagar()">
+          <i class="fa-solid fa-lock"></i>
+          Pagar S/ {{ total() }}
+        </button>
+      }
+
+      @if (paso() === 'exito') {
+        <a routerLink="/mis-reservas" class="btn btn-gold btn-block" (click)="cerrarPanel()">
+          Ver mis reservas
+        </a>
+      }
+
+      <div class="summary-secure">
+        <i class="fa-solid fa-shield-halved"></i>
+        Pago simulado con fines académicos
+      </div>
+    </aside>
+
+    <main class="wizard-main">
+      <div class="wizard-top">
+        <div class="stepper" aria-label="Progreso de la reserva">
+          <span [class.active]="paso() === 'fechas'" [class.done]="paso() !== 'fechas'">1. Fechas</span>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span
+            [class.active]="paso() === 'pago' || paso() === 'procesando'"
+            [class.done]="paso() === 'exito'">
+            2. Pago
+          </span>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span [class.active]="paso() === 'exito'">3. Confirmación</span>
+        </div>
+
+        <button
+          type="button"
+          class="wizard-close"
+          aria-label="Cerrar reserva"
+          [disabled]="paso() === 'procesando'"
+          (click)="cerrarPanel()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      @switch (paso()) {
+        @case ('fechas') {
+          <section class="wizard-step">
+            <span class="step-eyebrow">Paso 1 de 2</span>
+            <h2>Elige tus fechas</h2>
+            <p class="step-lead">
+              El calendario bloquea los días que ya tienen una reserva para esta suite.
+              Así no tienes que adivinar la disponibilidad.
+            </p>
+
+            @if (cargandoOcupados()) {
+              <div class="loading-state">
+                <span class="spinner"></span>
+                <p>Consultando disponibilidad...</p>
+              </div>
+            }
+
+            @if (errorOcupados()) {
+              <div class="alert alert-error" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>{{ errorOcupados() }}</span>
+                <button type="button" class="btn btn-outline-dark btn-sm" (click)="cargarOcupados()">
+                  Reintentar
+                </button>
+              </div>
+            }
+
+            @if (!cargandoOcupados() && !errorOcupados()) {
+              <app-date-range-calendar
+                [ocupados]="ocupados()"
+                (rangoSeleccionado)="seleccionarRango($event)">
+              </app-date-range-calendar>
+
+              <div class="field notes-field">
+                <label for="reserva-notas">Notas especiales (opcional)</label>
+                <textarea
+                  id="reserva-notas"
+                  [formControl]="notas"
+                  maxlength="250"
+                  placeholder="Ej: Habitación en piso alto, check-in anticipado..."></textarea>
+                @if (notas.invalid && notas.touched) {
+                  <p class="field-error">Máximo 250 caracteres.</p>
+                }
+              </div>
+
+              @if (errorFechas()) {
+                <div class="alert alert-error" role="alert">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  <span>{{ errorFechas() }}</span>
+                </div>
+              }
+
+              <div class="step-actions">
+                <button type="button" class="btn btn-outline-dark" (click)="cerrarPanel()">
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-gold"
+                  [disabled]="!rango()"
+                  (click)="continuarPago()">
+                  Continuar al pago
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            }
+          </section>
+        }
+
+        @case ('pago') {
+          <section class="wizard-step">
+            <span class="step-eyebrow">Paso 2 de 2</span>
+            <h2>Simula tu pago</h2>
+            <p class="step-lead">
+              Esta es una pasarela de demostración. No se realizará ningún cargo real.
+            </p>
+
+            <form [formGroup]="pagoForm" (ngSubmit)="pagar()" novalidate class="payment-form">
+              <div class="payment-method">
+                <i class="fa-regular fa-credit-card"></i>
+                <span>Tarjeta de crédito o débito</span>
+                <span class="badge badge-gold">Simulado</span>
+              </div>
+
+              <div class="field">
+                <label for="pago-titular">Titular de la tarjeta</label>
+                <input
+                  id="pago-titular"
+                  type="text"
+                  formControlName="titular"
+                  autocomplete="off"
+                  placeholder="Nombre como aparece en la tarjeta">
+                @if (titular.invalid && (titular.touched || enviadoPago)) {
+                  <p class="field-error">
+                    @if (titular.hasError('required')) {
+                      El nombre del titular es obligatorio.
+                    } @else {
+                      Ingresa al menos 3 caracteres.
+                    }
+                  </p>
+                }
+              </div>
+
+              <div class="field">
+                <label for="pago-numero">Número de tarjeta</label>
+                <input
+                  id="pago-numero"
+                  type="text"
+                  formControlName="numeroTarjeta"
+                  inputmode="numeric"
+                  maxlength="16"
+                  autocomplete="off"
+                  placeholder="4111111111111111">
+                @if (numeroTarjeta.invalid && (numeroTarjeta.touched || enviadoPago)) {
+                  <p class="field-error">Ingresa los 16 dígitos, sin espacios.</p>
+                }
+                <p class="field-hint">Puedes usar cualquier número de 16 dígitos para la simulación.</p>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="field">
+                  <label for="pago-vencimiento">Vencimiento</label>
+                  <input
+                    id="pago-vencimiento"
+                    type="text"
+                    formControlName="vencimiento"
+                    inputmode="numeric"
+                    maxlength="5"
+                    autocomplete="off"
+                    placeholder="MM/AA">
+                  @if (vencimiento.invalid && (vencimiento.touched || enviadoPago)) {
+                    <p class="field-error">Usa el formato MM/AA.</p>
+                  }
+                </div>
+
+                <div class="field">
+                  <label for="pago-cvv">CVV</label>
+                  <input
+                    id="pago-cvv"
+                    type="text"
+                    formControlName="cvv"
+                    inputmode="numeric"
+                    maxlength="4"
+                    autocomplete="off"
+                    placeholder="123">
+                  @if (cvv.invalid && (cvv.touched || enviadoPago)) {
+                    <p class="field-error">Ingresa 3 o 4 dígitos.</p>
+                  }
+                </div>
+              </div>
+
+              @if (errorPago()) {
+                <div class="alert alert-error" role="alert">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  <span>{{ errorPago() }}</span>
+                </div>
+              }
+
+              <div class="step-actions">
+                <button type="button" class="btn btn-outline-dark" (click)="volverFechas()">
+                  <i class="fa-solid fa-arrow-left"></i>
+                  Volver a fechas
+                </button>
+                <button type="submit" class="btn btn-gold">
+                  <i class="fa-solid fa-lock"></i>
+                  Pagar S/ {{ total() }}
+                </button>
+              </div>
+            </form>
+
+            <div class="payment-note">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div>
+                <strong>Pasarela de demostración</strong>
+                <p>
+                  Los datos de tarjeta se usan solo para validar el formulario y no se guardan
+                  ni se envían a ningún servidor de pagos.
+                </p>
+              </div>
+            </div>
+          </section>
+        }
+
+        @case ('procesando') {
+          <section class="wizard-step processing-step" role="status" aria-live="polite">
+            <span class="spinner spinner-dark"></span>
+            <h2>Procesando tu pago...</h2>
+            <p class="step-lead">
+              Estamos validando la disponibilidad de la suite y confirmando tu reserva.
+              No cierres esta ventana.
+            </p>
+            <div class="processing-list">
+              <span><i class="fa-solid fa-check"></i> Datos de la tarjeta validados</span>
+              <span><i class="fa-solid fa-check"></i> Verificando disponibilidad</span>
+              <span class="pending"><i class="fa-solid fa-circle-notch fa-spin"></i> Confirmando reserva</span>
+            </div>
+          </section>
+        }
+
+        @case ('exito') {
+          <section class="wizard-step success-step">
+            <div class="success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <span class="step-eyebrow">Reserva confirmada</span>
+            <h2>Todo listo, {{ authService.usuario()?.nombre }}</h2>
+            <p class="step-lead">
+              Tu estancia en {{ servicio.nombre }} quedó registrada. Te esperamos en la cordillera.
+            </p>
+
+            <div class="voucher">
+              <div>
+                <span>Código de reserva</span>
+                <strong>{{ codigoReserva() }}</strong>
+              </div>
+              <div>
+                <span>Entrada</span>
+                <strong>{{ formatearFecha(reservaConfirmada()?.fechaEntrada) }}</strong>
+              </div>
+              <div>
+                <span>Salida</span>
+                <strong>{{ formatearFecha(reservaConfirmada()?.fechaSalida) }}</strong>
+              </div>
+              <div>
+                <span>Total pagado</span>
+                <strong>S/ {{ reservaConfirmada()?.total }}</strong>
+              </div>
+            </div>
+
+            <div class="step-actions center">
+              <a routerLink="/mis-reservas" class="btn btn-gold" (click)="cerrarPanel()">
+                <i class="fa-solid fa-list-check"></i>
+                Ver mis reservas
+              </a>
+              <button type="button" class="btn btn-outline-dark" (click)="cerrarPanel()">
+                Volver al catálogo
+              </button>
+            </div>
+          </section>
+        }
+      }
+    </main>
+  </div>
+</div>

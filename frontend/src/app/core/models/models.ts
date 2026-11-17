@@ -71,6 +71,12 @@ export interface RegistroRequest {
   rol: Rol;
 }
 
+// Rango que ya está ocupado por otra reserva (check-out exclusivo).
+export interface RangoOcupado {
+  fechaEntrada: string;
+  fechaSalida: string;
+}
+
 export interface CrearReservaRequest {
   servicioId: number;
   fechaEntrada: string;

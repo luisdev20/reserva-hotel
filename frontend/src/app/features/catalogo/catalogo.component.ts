@@ -1,16 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Servicio } from '../../core/models/models';
 import { fechaLocalISO, rangoFechasValidator } from '../../core/validators/date-range.validator';
+import { SuiteCardComponent } from './suite-card/suite-card.component';
+import { ReservaWizardComponent } from '../reservas/reserva-wizard/reserva-wizard.component';
 
 @Component({
   selector: 'app-catalogo',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, SuiteCardComponent, ReservaWizardComponent],
   templateUrl: './catalogo.component.html',
   styleUrl: './catalogo.component.css'
 })
@@ -25,49 +27,37 @@ export class CatalogoComponent implements OnInit {
   readonly cargando = signal(true);
   readonly errorCarga = signal('');
   readonly filtroAplicado = signal(false);
+  readonly filtroResumen = signal('');
+  readonly errorFiltro = signal('');
 
   readonly servicioSeleccionado = signal<Servicio | null>(null);
-  readonly cargandoReserva = signal(false);
-  readonly errorReserva = signal('');
-  readonly enviadoReserva = signal(false);
-  readonly noches = signal(0);
-  readonly totalEstimado = signal(0);
-  readonly minSalida = signal('');
   readonly hoyISO = fechaLocalISO(new Date());
 
-  // Filtro por precio máximo (consume la consulta JPQL del backend).
-  readonly filtroForm = this.fb.group({
-    precioMax: [null as number | null, [Validators.min(1)]]
-  });
-
-  // Formulario reactivo de reserva con validación de rango de fechas.
-  readonly reservaForm = this.fb.nonNullable.group(
+  // Filtro combinado: rango de fechas y precio máximo.
+  // El validador de grupo comprueba que la salida sea posterior a la entrada.
+  readonly filtroForm = this.fb.group(
     {
-      fechaEntrada: ['', [Validators.required]],
-      fechaSalida: ['', [Validators.required]],
-      notas: ['', [Validators.maxLength(250)]]
+      precioMax: [null as number | null, [Validators.min(1)]],
+      fechaEntrada: [''],
+      fechaSalida: ['']
     },
     { validators: rangoFechasValidator }
   );
-
-  constructor() {
-    this.reservaForm.valueChanges.subscribe(() => this.actualizarResumen());
-  }
 
   ngOnInit(): void {
     this.cargarServicios();
   }
 
-  get fechaEntrada() {
-    return this.reservaForm.controls.fechaEntrada;
+  get precioMax() {
+    return this.filtroForm.controls.precioMax;
   }
 
-  get fechaSalida() {
-    return this.reservaForm.controls.fechaSalida;
+  get fechaEntradaFiltro() {
+    return this.filtroForm.controls.fechaEntrada;
   }
 
-  get notas() {
-    return this.reservaForm.controls.notas;
+  get fechaSalidaFiltro() {
+    return this.filtroForm.controls.fechaSalida;
   }
 
   scrollACatalogo(): void {
@@ -77,11 +67,13 @@ export class CatalogoComponent implements OnInit {
   cargarServicios(): void {
     this.cargando.set(true);
     this.errorCarga.set('');
+    this.errorFiltro.set('');
 
     this.reservaService.getServicios().subscribe({
       next: (datos) => {
         this.servicios.set(datos);
         this.filtroAplicado.set(false);
+        this.filtroResumen.set('');
         this.cargando.set(false);
       },
       error: (error: Error) => {
@@ -91,26 +83,40 @@ export class CatalogoComponent implements OnInit {
     });
   }
 
-  filtrarPorPrecio(): void {
-    const precioMax = this.filtroForm.controls.precioMax;
+  aplicarFiltros(): void {
+    this.errorFiltro.set('');
 
-    if (precioMax.invalid) {
-      precioMax.markAsTouched();
+    if (this.filtroForm.invalid) {
+      this.filtroForm.markAllAsTouched();
       return;
     }
 
-    if (!precioMax.value || precioMax.value <= 0) {
+    const valores = this.filtroForm.getRawValue();
+    const precioMax = valores.precioMax;
+    const fechaEntrada = valores.fechaEntrada ?? '';
+    const fechaSalida = valores.fechaSalida ?? '';
+
+    if ((fechaEntrada && !fechaSalida) || (!fechaEntrada && fechaSalida)) {
+      this.errorFiltro.set('Selecciona la fecha de entrada y la de salida para buscar disponibilidad.');
+      return;
+    }
+
+    if (!fechaEntrada && (!precioMax || precioMax <= 0)) {
       this.cargarServicios();
       return;
     }
 
     this.cargando.set(true);
-    this.errorCarga.set('');
 
-    this.reservaService.buscarPorPrecioMax(precioMax.value).subscribe({
+    const peticion = fechaEntrada && fechaSalida
+      ? this.reservaService.buscarDisponibles(fechaEntrada, fechaSalida, precioMax)
+      : this.reservaService.buscarPorPrecioMax(precioMax!);
+
+    peticion.subscribe({
       next: (datos) => {
         this.servicios.set(datos);
         this.filtroAplicado.set(true);
+        this.filtroResumen.set(this.describirFiltro(fechaEntrada, fechaSalida, precioMax));
         this.cargando.set(false);
       },
       error: (error: Error) => {
@@ -121,11 +127,12 @@ export class CatalogoComponent implements OnInit {
   }
 
   limpiarFiltro(): void {
-    this.filtroForm.reset({ precioMax: null });
+    this.filtroForm.reset({ precioMax: null, fechaEntrada: '', fechaSalida: '' });
+    this.errorFiltro.set('');
     this.cargarServicios();
   }
 
-  abrirModalReserva(servicio: Servicio): void {
+  abrirReserva(servicio: Servicio): void {
     if (!servicio.disponible) {
       this.toastService.info('Esta suite no está disponible por el momento.');
       return;
@@ -136,86 +143,24 @@ export class CatalogoComponent implements OnInit {
       return;
     }
 
-    const hoy = new Date();
-    const entrada = new Date(hoy);
-    entrada.setDate(hoy.getDate() + 1);
-    const salida = new Date(hoy);
-    salida.setDate(hoy.getDate() + 3);
-
     this.servicioSeleccionado.set(servicio);
-    this.errorReserva.set('');
-    this.enviadoReserva.set(false);
-    this.reservaForm.reset({
-      fechaEntrada: fechaLocalISO(entrada),
-      fechaSalida: fechaLocalISO(salida),
-      notas: ''
-    });
-    this.actualizarResumen();
   }
 
-  cerrarModal(): void {
+  cerrarReserva(): void {
     this.servicioSeleccionado.set(null);
-    this.errorReserva.set('');
   }
 
-  confirmarReserva(): void {
-    this.enviadoReserva.set(true);
-    this.errorReserva.set('');
+  private describirFiltro(entrada: string, salida: string, precioMax: number | null): string {
+    const rango = entrada && salida
+      ? `Del ${this.formatearFecha(entrada)} al ${this.formatearFecha(salida)}`
+      : '';
+    const precio = precioMax ? `Hasta S/ ${precioMax} por noche` : '';
 
-    if (this.reservaForm.invalid) {
-      this.reservaForm.markAllAsTouched();
-      return;
-    }
-
-    const servicio = this.servicioSeleccionado();
-    if (!servicio?.id) {
-      return;
-    }
-
-    const valores = this.reservaForm.getRawValue();
-    this.cargandoReserva.set(true);
-
-    this.reservaService.crearReserva({
-      servicioId: servicio.id,
-      fechaEntrada: valores.fechaEntrada,
-      fechaSalida: valores.fechaSalida,
-      notas: valores.notas.trim() || undefined
-    }).subscribe({
-      next: (reserva) => {
-        this.cargandoReserva.set(false);
-        this.toastService.exito(
-          `Reserva #${reserva.id} confirmada. Total: S/ ${reserva.total}`
-        );
-        this.cerrarModal();
-      },
-      error: (error: Error) => {
-        this.cargandoReserva.set(false);
-        this.errorReserva.set(error.message);
-      }
-    });
+    return [rango, precio].filter(Boolean).join(' · ');
   }
 
-  private actualizarResumen(): void {
-    const { fechaEntrada, fechaSalida } = this.reservaForm.getRawValue();
-    this.minSalida.set(fechaEntrada || this.hoyISO);
-
-    if (!fechaEntrada || !fechaSalida) {
-      this.noches.set(0);
-      this.totalEstimado.set(0);
-      return;
-    }
-
-    const entrada = new Date(`${fechaEntrada}T00:00:00`);
-    const salida = new Date(`${fechaSalida}T00:00:00`);
-    const diferencia = Math.round((salida.getTime() - entrada.getTime()) / 86400000);
-    const servicio = this.servicioSeleccionado();
-
-    if (diferencia > 0 && servicio) {
-      this.noches.set(diferencia);
-      this.totalEstimado.set(diferencia * servicio.precio);
-    } else {
-      this.noches.set(0);
-      this.totalEstimado.set(0);
-    }
+  private formatearFecha(iso: string): string {
+    const [anio, mes, dia] = iso.split('-');
+    return `${dia}/${mes}/${anio}`;
   }
 }
