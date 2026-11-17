@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Interior de suite con vista a los Andes">
+
+<defs>
+  <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#e8d4c4"/><stop offset="1" stop-color="#d8b9a6"/>
+  </linearGradient>
+  <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#9a6a4b"/><stop offset="1" stop-color="#7d5138"/>
+  </linearGradient>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#d9bda9"/><stop offset="1" stop-color="#f3e2d3"/>
+  </linearGradient>
+  <linearGradient id="bed" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f6eade"/><stop offset="1" stop-color="#e1c4ae"/>
+  </linearGradient>
+  <radialGradient id="vin" cx="50%" cy="45%" r="72%">
+    <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity=".28"/>
+  </radialGradient>
+  <filter id="grano" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncA type="linear" slope=".14"/></feComponentTransfer>
+  </filter>
+  <filter id="suave"><feGaussianBlur stdDeviation="16"/></filter>
+</defs>
+
+<rect width="1200" height="800" fill="url(#wall)"/>
+<rect y="596" width="1200" height="204" fill="url(#floor)"/>
+<g stroke="#6a422c" stroke-width="3" opacity=".26">
+  <line x1="0" y1="640" x2="1200" y2="640"/><line x1="0" y1="690" x2="1200" y2="690"/><line x1="0" y1="740" x2="1200" y2="740"/>
+</g>
+<rect x="0" y="580" width="1200" height="18" fill="#6a422c" opacity=".5"/>
+
+<g>
+  <rect x="82" y="108" width="440" height="364" rx="6" fill="#2c2a26"/>
+  <rect x="92" y="118" width="420" height="344" fill="url(#sky)"/>
+  <clipPath id="ventana"><rect x="92" y="118" width="420" height="344"/></clipPath>
+  
+<g clip-path="url(#ventana)">
+  <rect x="92" y="118" width="420" height="344" fill="url(#sky)"/>
+  <circle cx="394" cy="201" r="26" fill="#f8d6ae" opacity=".9"/>
+  <path d="M92,462 L168,283 L235,359 L302,249 L386,462 Z"
+        fill="#7d5548" opacity=".92"/>
+  <path d="M226,462 L310,307 L378,366 L436,290 L512,462 Z"
+        fill="#a67967" opacity=".9"/>
+  <path d="M126,386 Q218,352 310,393 T487,373"
+        fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="6"/>
+  <path d="M142,414 q14,-36 28,0 q14,-46 28,0 q14,-32 28,0" fill="none" stroke="#2d3a2c" stroke-opacity=".35" stroke-width="4"/>
+</g>
+  <rect x="92" y="118" width="420" height="344" fill="none" stroke="#2c2a26" stroke-width="12"/>
+  <line x1="302" y1="118" x2="302" y2="462" stroke="#2c2a26" stroke-width="9"/>
+  <line x1="92" y1="290" x2="512" y2="290" stroke="#2c2a26" stroke-width="9"/>
+  <path d="M74,112 q34,116.96000000000001 6,356 l-34,0 l0,-362 Z" fill="#8a4b3c" opacity=".82"/><path d="M530,112 q-34,116.96000000000001 -6,356 l34,0 l0,-362 Z" fill="#8a4b3c" opacity=".82"/>
+</g>
+
+<g>
+  <rect x="119" y="646" width="330" height="12" rx="6" fill="#6a422c" opacity=".65"/>
+  <path d="M146,612 q30,-18 60,0" stroke="#c08457" stroke-width="3" fill="none"/>
+</g>
+<ellipse cx="720" cy="662" rx="360" ry="52" fill="#8a4b3c" opacity=".13"/>
+
+<g>
+  <ellipse cx="290" cy="638" rx="105" ry="24" fill="#2b2118" opacity=".2"/>
+  <path d="M190,508 q0,-40 40,-40 l120,0 q40,0 40,40 l0,94 l-200,0 Z" fill="#8a4b3c"/>
+  <path d="M202,528 q0,-28 28,-28 l120,0 q28,0 28,28 l0,66 l-176,0 Z" fill="#64352b" opacity=".55"/>
+  <rect x="182" y="598" width="216" height="44" rx="18" fill="#8a4b3c"/>
+  <rect x="198" y="634" width="14" height="28" rx="4" fill="#6a422c"/>
+  <rect x="368" y="634" width="14" height="28" rx="4" fill="#6a422c"/>
+  <rect x="212" y="488" width="52" height="44" rx="12" fill="#fff8f2" opacity=".85"/>
+</g>
+
+<g>
+  <ellipse cx="859" cy="648" rx="259" ry="34" fill="#2b2118" opacity=".18"/>
+  <rect x="628" y="318" width="462" height="200" rx="22" fill="#8a4b3c"/>
+  <rect x="642" y="332" width="434" height="172" rx="16" fill="#64352b" opacity=".55"/>
+  <rect x="613" y="468" width="492" height="170" rx="20" fill="url(#bed)"/>
+  <rect x="623" y="523" width="472" height="105" rx="16" fill="#e1c4ae"/>
+  <rect x="656" y="480" width="157" height="62" rx="16" fill="#fff8f2"/>
+  <rect x="822" y="484" width="139" height="54" rx="14" fill="#fff8f2"/>
+  <rect x="621" y="562" width="476" height="44" rx="10" fill="#8a4b3c" opacity=".78"/>
+  <rect x="646" y="634" width="16" height="28" rx="4" fill="#6a422c"/>
+  <rect x="1056" y="634" width="16" height="28" rx="4" fill="#6a422c"/>
+</g>
+
+<g>
+  <rect x="548" y="552" width="118" height="14" rx="7" fill="#6a422c"/>
+  <rect x="560" y="566" width="10" height="82" fill="#6a422c"/>
+  <rect x="644" y="566" width="10" height="82" fill="#6a422c"/>
+  <path d="M584,500 l46,0 l12,42 l-70,0 Z" fill="#c08457"/>
+  <line x1="607" y1="500" x2="607" y2="478" stroke="#6a422c" stroke-width="5"/>
+  <ellipse cx="607" cy="542" rx="70" ry="44" fill="#f8d6ae" opacity=".16" filter="url(#suave)"/>
+  <rect x="578" y="542" width="24" height="10" rx="3" fill="#8a4b3c"/>
+</g>
+
+<g transform="translate(102 512) scale(0.82)">
+  <ellipse cx="0" cy="78" rx="62" ry="14" fill="#2b2118" opacity=".18"/>
+  <path d="M-48,78 L-38,-2 L38,-2 L48,78 Z" fill="#c08457" opacity=".9"/>
+  <path d="M-42,2 L42,2" stroke="#fff" stroke-opacity=".35" stroke-width="4"/>
+  <g fill="none" stroke="#8a4b3c" stroke-width="7" stroke-linecap="round">
+    <path d="M0,0 C-8,-48 -50,-62 -72,-84"/>
+    <path d="M0,0 C6,-54 40,-72 62,-96"/>
+    <path d="M0,-8 C-30,-94 -10,-120 8,-142"/>
+    <path d="M0,-4 C34,-88 62,-100 86,-112"/>
+    <path d="M0,-6 C-56,-72 -82,-70 -104,-58"/>
+  </g>
+  <g fill="#8a4b3c" opacity=".9">
+    <ellipse cx="-72" cy="-86" rx="30" ry="14" transform="rotate(-28 -72 -86)"/>
+    <ellipse cx="64" cy="-98" rx="30" ry="14" transform="rotate(24 64 -98)"/>
+    <ellipse cx="10" cy="-144" rx="15" ry="30"/>
+    <ellipse cx="88" cy="-114" rx="28" ry="13" transform="rotate(18 88 -114)"/>
+    <ellipse cx="-106" cy="-58" rx="28" ry="13" transform="rotate(-8 -106 -58)"/>
+  </g>
+</g>
+<rect width="1200" height="800" filter="url(#grano)" opacity=".55"/>
+<rect width="1200" height="800" fill="url(#vin)"/>
+</svg>

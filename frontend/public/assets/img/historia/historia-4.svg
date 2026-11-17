@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Hotel Andes Suites en la actualidad">
+
+<defs>
+  <linearGradient id="papel" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#d8c6a6"/><stop offset=".55" stop-color="#c9b391"/><stop offset="1" stop-color="#b99f7c"/>
+  </linearGradient>
+  <radialGradient id="vin" cx="50%" cy="45%" r="72%">
+    <stop offset="55%" stop-color="#3b2b1b" stop-opacity="0"/><stop offset="100%" stop-color="#3b2b1b" stop-opacity=".45"/>
+  </radialGradient>
+  <filter id="grano">
+    <feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer>
+  </filter>
+  <filter id="suave"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>
+
+<rect width="1200" height="800" fill="url(#papel)"/>
+<g opacity=".28" stroke="#5b4630" stroke-width="3" fill="none">
+  <path d="M0,110 q150,-40 300,0 t300,0 t300,0 t300,0"/>
+  <path d="M0,150 q150,-40 300,0 t300,0 t300,0 t300,0"/>
+</g>
+
+<g>
+  <path d="M0,610 L200,410 L380,550 L560,360 L780,570 L980,410 L1200,550 L1200,800 L0,800 Z" fill="#6d5941" opacity=".5"/>
+  <rect y="650" width="1200" height="150" fill="#9b8565" opacity=".52"/>
+  <g>
+    <path d="M220,650 L220,300 L980,300 L980,650 Z" fill="#c9b18d"/>
+    <path d="M200,310 L600,220 L1000,310 Z" fill="#7c6142"/>
+    <g fill="#594329" opacity=".8">
+      <rect x="270" y="350" width="80" height="70"/><rect x="390" y="350" width="80" height="70"/>
+      <rect x="510" y="350" width="80" height="70"/><rect x="630" y="350" width="80" height="70"/>
+      <rect x="750" y="350" width="80" height="70"/><rect x="870" y="350" width="80" height="70"/>
+      <rect x="270" y="460" width="80" height="70"/><rect x="390" y="460" width="80" height="70"/>
+      <rect x="510" y="460" width="80" height="70"/><rect x="630" y="460" width="80" height="70"/>
+      <rect x="750" y="460" width="80" height="70"/><rect x="870" y="460" width="80" height="70"/>
+    </g>
+    <g fill="#e8d7b7" opacity=".8">
+      <rect x="282" y="362" width="56" height="46"/><rect x="402" y="362" width="56" height="46"/>
+      <rect x="522" y="362" width="56" height="46"/><rect x="642" y="362" width="56" height="46"/>
+      <rect x="762" y="362" width="56" height="46"/><rect x="882" y="362" width="56" height="46"/>
+      <rect x="282" y="472" width="56" height="46"/><rect x="402" y="472" width="56" height="46"/>
+      <rect x="522" y="472" width="56" height="46"/><rect x="642" y="472" width="56" height="46"/>
+      <rect x="762" y="472" width="56" height="46"/><rect x="882" y="472" width="56" height="46"/>
+    </g>
+    <path d="M500,650 L500,540 L700,540 L700,650 Z" fill="#594329"/>
+    <path d="M480,545 L600,500 L720,545 Z" fill="#8b704d"/>
+    <rect x="570" y="300" width="60" height="40" fill="#594329"/>
+    <path d="M560,300 l40,0 l0,-26 l-40,0 Z" fill="#6b5237"/>
+  </g>
+  <g stroke="#4a3826" stroke-width="6" opacity=".55">
+    <line x1="160" y1="650" x2="160" y2="560"/><line x1="1040" y1="650" x2="1040" y2="560"/>
+    <line x1="130" y1="590" x2="190" y2="590"/><line x1="1010" y1="590" x2="1070" y2="590"/>
+  </g>
+  <g fill="#d8c6a6" opacity=".4">
+    <ellipse cx="260" cy="704" rx="120" ry="18"/><ellipse cx="820" cy="710" rx="190" ry="20"/>
+  </g>
+</g>
+<g opacity=".22" stroke="#4a3826" stroke-width="2">
+  <line x1="90" y1="90" x2="250" y2="140"/><line x1="920" y1="700" x2="1100" y2="650"/>
+  <line x1="180" y1="730" x2="330" y2="700"/><line x1="880" y1="120" x2="1000" y2="170"/>
+</g>
+<rect width="1200" height="800" filter="url(#grano)" opacity=".65"/>
+<rect width="1200" height="800" fill="url(#vin)"/>
+<rect x="34" y="34" width="1132" height="732" fill="none" stroke="#efe2ca" stroke-width="10" opacity=".8"/>
+<rect x="52" y="52" width="1096" height="696" fill="none" stroke="#5b4630" stroke-width="2" opacity=".45"/>
+</svg>

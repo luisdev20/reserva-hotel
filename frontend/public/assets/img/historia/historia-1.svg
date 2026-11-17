@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Casa fundadora en la cordillera">
+
+<defs>
+  <linearGradient id="papel" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#d8c6a6"/><stop offset=".55" stop-color="#c9b391"/><stop offset="1" stop-color="#b99f7c"/>
+  </linearGradient>
+  <radialGradient id="vin" cx="50%" cy="45%" r="72%">
+    <stop offset="55%" stop-color="#3b2b1b" stop-opacity="0"/><stop offset="100%" stop-color="#3b2b1b" stop-opacity=".45"/>
+  </radialGradient>
+  <filter id="grano">
+    <feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer>
+  </filter>
+  <filter id="suave"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>
+
+<rect width="1200" height="800" fill="url(#papel)"/>
+<g opacity=".28" stroke="#5b4630" stroke-width="3" fill="none">
+  <path d="M0,110 q150,-40 300,0 t300,0 t300,0 t300,0"/>
+  <path d="M0,150 q150,-40 300,0 t300,0 t300,0 t300,0"/>
+</g>
+
+<g>
+  <path d="M0,560 L180,330 L330,470 L500,250 L680,470 L850,320 L1050,500 L1200,390 L1200,800 L0,800 Z" fill="#8f795d" opacity=".55"/>
+  <path d="M0,620 L220,470 L390,580 L610,410 L820,600 L1030,470 L1200,580 L1200,800 L0,800 Z" fill="#6d5941" opacity=".55"/>
+  <rect y="650" width="1200" height="150" fill="#9b8565" opacity=".55"/>
+  <g>
+    <path d="M330,650 L330,430 L600,430 L600,650 Z" fill="#c9b18d"/>
+    <path d="M300,440 L465,300 L630,440 Z" fill="#7c6142"/>
+    <path d="M316,438 L465,318 L614,438" fill="none" stroke="#4a3826" stroke-width="6" opacity=".55"/>
+    <rect x="400" y="520" width="90" height="130" fill="#594329"/>
+    <circle cx="472" cy="586" r="5" fill="#d8c6a6"/>
+    <rect x="350" y="475" width="60" height="50" fill="#8e7657"/>
+    <line x1="380" y1="475" x2="380" y2="525" stroke="#3d2e1e" stroke-width="3"/>
+    <line x1="350" y1="500" x2="410" y2="500" stroke="#3d2e1e" stroke-width="3"/>
+    <rect x="520" y="480" width="56" height="56" fill="#8e7657"/>
+    <path d="M540,480 l0,56 M520,508 l56,0" stroke="#3d2e1e" stroke-width="3"/>
+    <path d="M300,650 L660,650 L680,670 L280,670 Z" fill="#6b5237"/>
+  </g>
+  <g stroke="#4a3826" stroke-width="4" opacity=".65">
+    <line x1="700" y1="650" x2="700" y2="580"/><line x1="760" y1="650" x2="760" y2="580"/><line x1="820" y1="650" x2="820" y2="580"/>
+    <line x1="680" y1="600" x2="840" y2="600"/><line x1="680" y1="630" x2="840" y2="630"/>
+  </g>
+  <g>
+    <rect x="880" y="540" width="14" height="110" fill="#4a3826"/>
+    <circle cx="887" cy="500" r="52" fill="#6d5941" opacity=".85"/>
+    <circle cx="860" cy="480" r="34" fill="#6d5941" opacity=".8"/>
+    <circle cx="915" cy="485" r="30" fill="#6d5941" opacity=".8"/>
+  </g>
+  <g fill="#d8c6a6" opacity=".5">
+    <ellipse cx="240" cy="700" rx="100" ry="18"/><ellipse cx="960" cy="690" rx="130" ry="16"/>
+  </g>
+</g>
+<g opacity=".22" stroke="#4a3826" stroke-width="2">
+  <line x1="90" y1="90" x2="250" y2="140"/><line x1="920" y1="700" x2="1100" y2="650"/>
+  <line x1="180" y1="730" x2="330" y2="700"/><line x1="880" y1="120" x2="1000" y2="170"/>
+</g>
+<rect width="1200" height="800" filter="url(#grano)" opacity=".65"/>
+<rect width="1200" height="800" fill="url(#vin)"/>
+<rect x="34" y="34" width="1132" height="732" fill="none" stroke="#efe2ca" stroke-width="10" opacity=".8"/>
+<rect x="52" y="52" width="1096" height="696" fill="none" stroke="#5b4630" stroke-width="2" opacity=".45"/>
+</svg>
