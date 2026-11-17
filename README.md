@@ -4,8 +4,6 @@ Aplicación web para la gestión de reservas hoteleras, desarrollada con **Sprin
 
 El sistema permite consultar suites y servicios, filtrar por precio, registrar usuarios, reservar con validación de fechas y disponibilidad, cancelar reservas y administrar el catálogo desde un panel con roles.
 
-> Documentación de estudio y sustento de la rúbrica: [`DOCUMENTACION_RUBRICA.md`](./DOCUMENTACION_RUBRICA.md)
-
 ---
 
 ## Requisitos previos
@@ -44,7 +42,6 @@ sistemaReserva/
 │       │   └── app.config.ts             # Providers globales
 │       ├── environments/                 # URL centralizada de la API
 │       └── styles.css                    # Sistema de diseño global
-├── DOCUMENTACION_RUBRICA.md              # Guía de estudio y exposición
 └── pom.xml
 ```
 
