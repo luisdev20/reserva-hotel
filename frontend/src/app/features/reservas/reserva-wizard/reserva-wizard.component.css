@@ -307,36 +307,6 @@
   font-size: 18px;
 }
 
-.payment-method .badge {
-  margin-left: auto;
-}
-
-.payment-note {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
-  padding: 16px;
-  border: 1px dashed var(--stone);
-  border-radius: 6px;
-  background: #fbf9f4;
-  color: var(--ink-soft);
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.payment-note i {
-  color: var(--forest);
-  font-size: 18px;
-  margin-top: 2px;
-}
-
-.payment-note strong {
-  display: block;
-  color: var(--night);
-  margin-bottom: 3px;
-  font-size: 13px;
-}
-
 /* ---------- Procesando ---------- */
 .processing-step {
   min-height: 460px;
