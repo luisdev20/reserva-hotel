@@ -1,0 +1,343 @@
+/* ---------- Portada ---------- */
+.historia-hero {
+  position: relative;
+  color: var(--cream);
+  padding: 104px 0 94px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(20, 27, 36, 0.95) 0%, rgba(20, 27, 36, 0.78) 58%, rgba(20, 27, 36, 0.5) 100%),
+    url('/assets/img/historia/historia-1.svg') center/cover no-repeat;
+}
+
+.historia-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 75% 35%, rgba(201, 166, 107, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
+.historia-hero .wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.historia-hero h1 {
+  color: var(--cream);
+  max-width: 18ch;
+  font-size: clamp(34px, 4.6vw, 56px);
+}
+
+.historia-hero .lead {
+  max-width: 58ch;
+  color: var(--stone);
+  font-size: 16.5px;
+  margin: 18px 0 30px;
+}
+
+/* ---------- Relato ---------- */
+.historia-intro {
+  padding: 76px 0;
+}
+
+.historia-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 54px;
+  align-items: center;
+}
+
+.historia-texto h2 {
+  font-size: clamp(26px, 3vw, 38px);
+  margin-bottom: 18px;
+}
+
+.historia-texto p {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.historia-texto blockquote {
+  margin-top: 24px;
+  padding: 4px 0 4px 20px;
+  border-left: 3px solid var(--gold);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.45;
+  color: var(--night);
+}
+
+.historia-texto cite {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 11.5px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--gold-2);
+}
+
+/* ---------- Fotos estilo antiguo ---------- */
+.foto-antigua {
+  position: relative;
+  background: #fdfaf3;
+  padding: 14px 14px 16px;
+  border: 1px solid #d7c8ae;
+  box-shadow: 0 16px 36px rgba(60, 44, 26, 0.16);
+  transform: rotate(-1.3deg);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.foto-antigua:nth-child(even) {
+  transform: rotate(1.1deg);
+}
+
+.foto-antigua:hover {
+  transform: rotate(0) translateY(-3px);
+  box-shadow: 0 22px 46px rgba(60, 44, 26, 0.22);
+}
+
+.foto-antigua::before {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 92px;
+  height: 22px;
+  background: rgba(201, 166, 107, 0.42);
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+  border-right: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.foto-antigua img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  filter: sepia(0.12) contrast(0.97);
+}
+
+.foto-antigua figcaption {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: #6d5a44;
+  text-align: center;
+  padding-top: 11px;
+}
+
+.foto-principal {
+  transform: rotate(1.8deg);
+}
+
+/* ---------- Línea de tiempo ---------- */
+.linea-tiempo {
+  background: #efe9dd;
+  padding: 70px 0 54px;
+}
+
+.timeline {
+  position: relative;
+  max-width: 860px;
+  margin: 8px auto 0;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 80px;
+  top: 10px;
+  bottom: 15px;
+  width: 1px;
+  background: #cdbfa7;
+}
+
+.hito {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 36px;
+  padding-bottom: 34px;
+}
+
+.hito::before {
+  content: "";
+  position: absolute;
+  left: 76px;
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px #efe9dd, 0 0 0 4px var(--gold);
+}
+
+.hito-anio {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--gold-2);
+  text-align: right;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.hito-contenido h3 {
+  font-size: 20px;
+  margin-bottom: 7px;
+}
+
+.hito-contenido p {
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.65;
+  max-width: 64ch;
+}
+
+/* ---------- Galería ---------- */
+.galeria {
+  padding: 74px 0;
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* ---------- Valores ---------- */
+.valores {
+  background: #fbf8f1;
+  padding: 70px 0;
+}
+
+.valores-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.valor-card {
+  background: #fff;
+  border: 1px solid var(--stone);
+  border-radius: var(--radius);
+  padding: 24px 22px;
+}
+
+.valor-card i {
+  color: var(--gold-2);
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.valor-card h3 {
+  font-size: 17px;
+  margin-bottom: 7px;
+}
+
+.valor-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* ---------- Cierre ---------- */
+.cierre {
+  padding: 64px 0;
+  background: var(--night);
+  color: var(--cream);
+}
+
+.cierre-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 36px;
+}
+
+.cierre h2 {
+  color: var(--cream);
+  max-width: 24ch;
+  margin: 8px 0 10px;
+}
+
+.cierre p {
+  color: var(--stone);
+  font-size: 14px;
+  max-width: 58ch;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .historia-grid {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+
+  .foto-principal {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  .valores-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .historia-hero {
+    padding: 72px 0 66px;
+  }
+
+  .historia-intro {
+    padding: 52px 0;
+  }
+
+  .linea-tiempo,
+  .galeria,
+  .valores {
+    padding: 48px 0;
+  }
+
+  .timeline::before {
+    left: 7px;
+  }
+
+  .hito {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding-left: 26px;
+    padding-bottom: 28px;
+  }
+
+  .hito::before {
+    left: 3px;
+  }
+
+  .hito-anio {
+    text-align: left;
+    font-size: 20px;
+  }
+
+  .galeria-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .valores-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cierre-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cierre .btn {
+    width: 100%;
+  }
+}

@@ -12,6 +12,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/catalogo/catalogo.component').then((m) => m.CatalogoComponent)
   },
   {
+    path: 'nosotros',
+    title: 'Nuestra historia | Andes Suites',
+    loadComponent: () => import('./features/nosotros/nosotros.component').then((m) => m.NosotrosComponent)
+  },
+  {
     path: 'login',
     title: 'Iniciar sesión | Andes Suites',
     canActivate: [guestGuard],

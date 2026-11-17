@@ -18,6 +18,7 @@
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="cerrarMenu()">
         Inicio / Suites
       </a>
+      <a routerLink="/nosotros" routerLinkActive="active" (click)="cerrarMenu()">Nosotros</a>
 
       @if (authService.isLoggedIn() && !authService.isAdmin()) {
         <a routerLink="/mis-reservas" routerLinkActive="active" (click)="cerrarMenu()">Mis reservas</a>

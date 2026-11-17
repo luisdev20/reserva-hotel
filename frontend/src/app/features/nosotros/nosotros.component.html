@@ -1,0 +1,123 @@
+<section class="historia-hero">
+  <div class="wrap">
+    <p class="hero-eyebrow">NUESTRA HISTORIA</p>
+    <h1>Una casa que creció con la cordillera.</h1>
+    <p class="lead">
+      Todo empezó con dos habitaciones, una cocina de leña y una mujer que creía que
+      nadie debería cruzar la montaña sin un lugar cálido donde dormir.
+    </p>
+    <a routerLink="/" class="btn btn-gold">
+      Conoce nuestras suites
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+<section class="historia-intro">
+  <div class="wrap historia-grid">
+    <div class="historia-texto">
+      <span class="eyebrow-line"></span>
+      <h2>Doña Rosa abrió la primera puerta en 1978.</h2>
+      <p>
+        Rosa Quispe tenía 58 años cuando decidió convertir el cuarto de sus hijos,
+        que ya habían formado sus propias familias, en la primera habitación de la
+        Posada La Cumbre. Su casa quedaba a un costado del camino que subía a los
+        pueblos de la cordillera. Los viajeros llegaban cansados, con frío y con
+        historias que merecían una mesa.
+      </p>
+      <p>
+        Doña Rosa no tenía un manual de hotelería. Tenía una regla: recibir a cada
+        persona como si fuera un familiar que volvía después de mucho tiempo. Así
+        pasaron los años, las habitaciones y las generaciones. Lo que nunca cambió
+        fue la costumbre de preguntar cómo había sido el viaje.
+      </p>
+      <blockquote>
+        «No construí un hotel: construí una casa donde otros pudieran descansar.»
+        <cite>Doña Rosa Quispe, fundadora</cite>
+      </blockquote>
+    </div>
+
+    <figure class="foto-antigua foto-principal">
+      <img src="assets/img/historia/historia-1.svg" alt="Casa original de Doña Rosa en la cordillera">
+      <figcaption>La casa original de Doña Rosa, 1978. Archivo familiar.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="linea-tiempo">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow-line"></span>
+      <h2>Cinco décadas de hospitalidad</h2>
+      <p>Una historia contada en puertas abiertas, habitaciones y recetas compartidas.</p>
+    </div>
+
+    <div class="timeline">
+      @for (hito of hitos; track hito.anio) {
+        <article class="hito">
+          <span class="hito-anio">{{ hito.anio }}</span>
+          <div class="hito-contenido">
+            <h3>{{ hito.titulo }}</h3>
+            <p>{{ hito.texto }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="galeria">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow-line"></span>
+      <h2>Fotos del archivo familiar</h2>
+      <p>Imágenes que la familia guarda como recuerdo de cada etapa del negocio.</p>
+    </div>
+
+    <div class="galeria-grid">
+      @for (foto of fotos; track foto.src) {
+        <figure class="foto-antigua">
+          <img [src]="foto.src" [alt]="foto.alt" loading="lazy">
+          <figcaption>{{ foto.leyenda }}</figcaption>
+        </figure>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="valores">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow-line"></span>
+      <h2>Lo que aprendimos en el camino</h2>
+      <p>La tecnología cambió, pero la forma de recibir sigue siendo la misma.</p>
+    </div>
+
+    <div class="valores-grid">
+      @for (valor of valores; track valor.titulo) {
+        <article class="valor-card">
+          <i class="fa-solid {{ valor.icono }}"></i>
+          <h3>{{ valor.titulo }}</h3>
+          <p>{{ valor.texto }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="cierre">
+  <div class="wrap cierre-inner">
+    <div>
+      <span class="hero-eyebrow">TE ESPERAMOS</span>
+      <h2>La tercera generación sigue abriendo la puerta.</h2>
+      <p>
+        Reserva una suite y descubre por qué, después de casi cincuenta años,
+        nuestros huéspedes siguen diciendo que aquí se sienten en casa.
+      </p>
+    </div>
+    <a routerLink="/" class="btn btn-gold">
+      Ver suites disponibles
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+</section>
