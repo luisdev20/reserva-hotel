@@ -2,12 +2,15 @@ package sistemaReserva.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sistemaReserva.dto.RangoOcupadoDTO;
 import sistemaReserva.dto.ServicioDTO;
 import sistemaReserva.service.ServicioService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -41,19 +44,48 @@ public class ServicioController {
         }
     }
 
-    // 3. Consultas personalizadas JPQL (filtrar por precio máximo o por término)
+    // 3. Consultas personalizadas: precio, texto o disponibilidad por fechas.
     @GetMapping("/buscar")
-    public ResponseEntity<List<ServicioDTO>> buscar(
+    public ResponseEntity<?> buscar(
             @RequestParam(required = false) Double precioMax,
-            @RequestParam(required = false) String q) {
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaEntrada,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaSalida) {
 
-        if (precioMax != null) {
-            return ResponseEntity.ok(servicioService.buscarDisponiblesPorPrecioMax(precioMax));
+        // Si se envía una sola fecha, la petición no es ambigua.
+        if ((fechaEntrada == null) != (fechaSalida == null)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Debes indicar la fecha de entrada y la fecha de salida"));
         }
-        if (q != null && !q.isBlank()) {
-            return ResponseEntity.ok(servicioService.buscarPorTermino(q));
+
+        try {
+            if (fechaEntrada != null && fechaSalida != null) {
+                return ResponseEntity.ok(
+                        servicioService.buscarDisponiblesEnRango(fechaEntrada, fechaSalida, precioMax));
+            }
+            if (precioMax != null) {
+                return ResponseEntity.ok(servicioService.buscarDisponiblesPorPrecioMax(precioMax));
+            }
+            if (q != null && !q.isBlank()) {
+                return ResponseEntity.ok(servicioService.buscarPorTermino(q));
+            }
+            return ResponseEntity.ok(servicioService.listarDisponibles());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.ok(servicioService.listarDisponibles());
+    }
+
+    // 3.1. Rangos ocupados de una suite para pintar el calendario del cliente.
+    @GetMapping("/{id}/ocupacion")
+    public ResponseEntity<?> ocupacion(@PathVariable Long id) {
+        try {
+            List<RangoOcupadoDTO> rangos = servicioService.listarFechasOcupadas(id);
+            return ResponseEntity.ok(rangos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     // 4. Crear un nuevo servicio (Requiere rol ADMIN en Spring Security)

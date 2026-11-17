@@ -178,4 +178,38 @@ class SistemaReservaApplicationTests {
         assertThrows(IllegalArgumentException.class,
                 () -> reservaService.crearReserva("cliente@andessuites.com", solicitud));
     }
+
+    @Test
+    void testFiltroDisponibilidadExcluyeSuiteOcupada() {
+        Servicio suiteAndina = servicioRepository.findAll().stream()
+                .filter(s -> s.getNombre().contains("Andina"))
+                .findFirst()
+                .orElseThrow();
+
+        // La reserva precargada ocupa desde hoy + 3 hasta hoy + 6.
+        List<ServicioDTO> disponibles = servicioService.buscarDisponiblesEnRango(
+                LocalDate.now().plusDays(4),
+                LocalDate.now().plusDays(5),
+                null);
+
+        assertFalse(disponibles.stream().anyMatch(s -> s.getId().equals(suiteAndina.getId())),
+                "La suite Andina no debe aparecer porque ya está ocupada en ese rango");
+        assertTrue(disponibles.stream().anyMatch(s -> s.getNombre().contains("Cordillera")),
+                "La suite Cordillera debe seguir disponible");
+    }
+
+    @Test
+    void testOcupacionDevuelveRangosReservados() {
+        Servicio suiteAndina = servicioRepository.findAll().stream()
+                .filter(s -> s.getNombre().contains("Andina"))
+                .findFirst()
+                .orElseThrow();
+
+        List<RangoOcupadoDTO> rangos = servicioService.listarFechasOcupadas(suiteAndina.getId());
+
+        assertFalse(rangos.isEmpty(), "La suite Andina debe tener al menos un rango ocupado");
+        assertTrue(rangos.stream().anyMatch(r ->
+                r.getFechaEntrada().equals(LocalDate.now().plusDays(3)) &&
+                r.getFechaSalida().equals(LocalDate.now().plusDays(6))));
+    }
 }

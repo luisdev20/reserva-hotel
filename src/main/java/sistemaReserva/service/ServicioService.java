@@ -2,13 +2,16 @@ package sistemaReserva.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sistemaReserva.dto.RangoOcupadoDTO;
 import sistemaReserva.dto.ServicioDTO;
 import sistemaReserva.model.Categoria;
+import sistemaReserva.model.Reserva;
 import sistemaReserva.model.Servicio;
 import sistemaReserva.repository.CategoriaRepository;
 import sistemaReserva.repository.ReservaRepository;
 import sistemaReserva.repository.ServicioRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +60,38 @@ public class ServicioService {
     public List<ServicioDTO> buscarPorTermino(String termino) {
         return servicioRepository.buscarPorTermino(termino).stream()
                 .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    // Servicios libres en un rango de fechas, opcionalmente con precio máximo.
+    public List<ServicioDTO> buscarDisponiblesEnRango(LocalDate fechaEntrada, LocalDate fechaSalida, Double precioMax) {
+        if (fechaEntrada == null || fechaSalida == null) {
+            throw new IllegalArgumentException("Debes indicar la fecha de entrada y la fecha de salida");
+        }
+        if (fechaEntrada.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de entrada no puede ser anterior a hoy");
+        }
+        if (!fechaSalida.isAfter(fechaEntrada)) {
+            throw new IllegalArgumentException("La fecha de salida debe ser posterior a la fecha de entrada");
+        }
+
+        List<Servicio> servicios = precioMax != null
+                ? servicioRepository.buscarDisponiblesEnRangoYPrecio(fechaEntrada, fechaSalida, precioMax)
+                : servicioRepository.buscarDisponiblesEnRango(fechaEntrada, fechaSalida);
+
+        return servicios.stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    // Rangos ya reservados de un servicio para bloquearlos en el calendario.
+    public List<RangoOcupadoDTO> listarFechasOcupadas(Long servicioId) {
+        if (!servicioRepository.existsById(servicioId)) {
+            throw new IllegalArgumentException("Servicio no encontrado con ID: " + servicioId);
+        }
+
+        return reservaRepository.findReservasActivasPorServicio(servicioId, LocalDate.now()).stream()
+                .map(this::convertirARango)
                 .collect(Collectors.toList());
     }
 
@@ -115,6 +150,10 @@ public class ServicioService {
         }
 
         servicioRepository.deleteById(id);
+    }
+
+    private RangoOcupadoDTO convertirARango(Reserva r) {
+        return new RangoOcupadoDTO(r.getFechaEntrada(), r.getFechaSalida());
     }
 
     // Conversión de Entidad a DTO

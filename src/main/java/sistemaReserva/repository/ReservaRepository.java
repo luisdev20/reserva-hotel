@@ -19,6 +19,19 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     // Consulta derivada: verifica si un servicio ya tiene reservas asociadas
     boolean existsByServicioId(Long servicioId);
 
+    // Consulta JPQL: rangos activos de un servicio desde una fecha.
+    // Se usa para pintar los días ocupados en el calendario.
+    @Query("""
+            SELECT r FROM Reserva r
+            WHERE r.servicio.id = :servicioId
+              AND r.estado <> 'CANCELADA'
+              AND r.fechaSalida >= :desde
+            ORDER BY r.fechaEntrada ASC
+            """)
+    List<Reserva> findReservasActivasPorServicio(
+            @Param("servicioId") Long servicioId,
+            @Param("desde") LocalDate desde);
+
     // Consulta JPQL: cuenta reservas activas que se cruzan con el rango solicitado.
     // Dos rangos se solapan cuando la entrada existente es anterior a la salida nueva
     // y la salida existente es posterior a la entrada nueva.
