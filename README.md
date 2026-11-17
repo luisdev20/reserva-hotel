@@ -137,6 +137,7 @@ Comenta las líneas de H2 en `application.properties` y descomenta las de MySQL 
 | Ruta | Componente | Acceso |
 |---|---|---|
 | `/` | Catálogo de suites | Público |
+| `/nosotros` | Historia de la fundadora y del hotel | Público |
 | `/login` | Inicio de sesión | Solo visitantes |
 | `/registro` | Registro de cliente | Solo visitantes |
 | `/mis-reservas` | Reservas del cliente | Sesión activa |
@@ -157,6 +158,8 @@ Las rutas usan **lazy loading**, títulos por página y guards (`authGuard`, `ad
 | `GET` | `/api/auth/usuarios` | Listar usuarios | Admin |
 | `GET` | `/api/servicios` | Listar suites/servicios | Público |
 | `GET` | `/api/servicios/buscar?precioMax={n}` | Filtrar por precio (JPQL) | Público |
+| `GET` | `/api/servicios/buscar?fechaEntrada={f}&fechaSalida={f}&precioMax={n}` | Suites libres en un rango de fechas | Público |
+| `GET` | `/api/servicios/{id}/ocupacion` | Rangos ocupados para el calendario | Público |
 | `GET` | `/api/servicios/{id}` | Detalle de un servicio | Público |
 | `POST` | `/api/servicios` | Crear servicio | Admin |
 | `PUT` | `/api/servicios/{id}` | Actualizar servicio | Admin |
@@ -185,6 +188,15 @@ Los errores se devuelven como JSON uniforme:
 ```
 
 Las respuestas de seguridad también son JSON: `401` para sesión ausente o expirada y `403` para permisos insuficientes.
+
+### Flujo de reserva en el frontend
+
+1. El catálogo permite filtrar por rango de fechas y precio máximo.
+2. Al abrir una suite, el calendario consulta `/api/servicios/{id}/ocupacion` y bloquea los días ya reservados.
+3. El cliente elige entrada y salida; el panel izquierdo muestra noches, subtotal y total.
+4. Se simula una pasarela de pago (no se guardan datos de tarjeta).
+5. Recién al confirmar el pago simulado se crea la reserva en el backend, que vuelve a validar el solapamiento.
+6. La pantalla final muestra el código de reserva y el acceso a “Mis reservas”.
 
 ---
 

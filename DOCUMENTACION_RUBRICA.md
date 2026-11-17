@@ -71,9 +71,9 @@ Resultado esperado:
 |---|---:|---|---|
 | Arquitectura Angular y componentes | 4 | `frontend/src/app/core`, `shared`, `features`, `app.routes.ts`, `app.config.ts` | Separación por responsabilidades, componentes standalone, servicios inyectables, modelos tipados y lazy loading. |
 | Navegación y rutas | 4 | `app.routes.ts`, `core/guards/auth.guard.ts`, `admin.guard.ts`, `guest.guard.ts`, `features/not-found` | Rutas públicas y privadas, guards por sesión y rol, retorno a la ruta intentada, 404 y títulos por página. |
-| Formularios y validaciones | 4 | `features/auth/login`, `features/auth/registro`, `features/catalogo`, `features/admin` | Reactive Forms, validadores nativos, validadores personalizados, mensajes de error y bloqueo de envíos inválidos. |
-| Consumo de API REST | 5 | `core/services`, `core/interceptors`, `environments/environment.ts` | HttpClient tipado, URL centralizada, interceptor JWT, interceptor de errores, estados de carga, reintento y manejo de 400/401/403/404/0. |
-| Diseño UI/UX y responsive | 3 | `styles.css`, navbar, catálogo, tablas, modales y notificaciones | Sistema de diseño, menú móvil, grillas adaptables, tablas convertidas en tarjetas, accesibilidad y estados visuales. |
+| Formularios y validaciones | 4 | `features/auth/login`, `features/auth/registro`, `features/catalogo`, `features/reservas/reserva-wizard`, `features/admin` | Reactive Forms, validadores nativos y personalizados, rango de fechas, formulario de pago simulado, mensajes de error y bloqueo de envíos inválidos. |
+| Consumo de API REST | 5 | `core/services`, `core/interceptors`, `environments/environment.ts` | HttpClient tipado, URL centralizada, interceptor JWT, interceptor de errores, consulta de ocupación, filtro por fechas, estados de carga, reintento y manejo de 400/401/403/404/0. |
+| Diseño UI/UX y responsive | 3 | `styles.css`, navbar, catálogo, `nosotros`, calendario, wizard de pago, tablas y notificaciones | Sistema de diseño, menú móvil, grillas adaptables, carrusel de imágenes, calendario con leyenda, panel de resumen, pasarela simulada, tablas convertidas en tarjetas y accesibilidad. |
 
 ### Nota importante sobre “módulos” en Angular
 
@@ -120,8 +120,9 @@ frontend/src/
 │   ├── features/
 │   │   ├── auth/login/                 Inicio de sesión
 │   │   ├── auth/registro/              Registro de cliente
-│   │   ├── catalogo/                   Catálogo y modal de reserva
-│   │   ├── reservas/                   Mis reservas
+│   │   ├── catalogo/                   Catálogo, filtros, cards con carrusel y calendario
+│   │   ├── reservas/                   Mis reservas y wizard de pago simulado
+│   │   ├── nosotros/                   Historia de la fundadora y fotos antiguas
 │   │   ├── admin/                      Panel administrativo
 │   │   └── not-found/                  Página 404
 │   ├── app.routes.ts                   Rutas y guards
@@ -159,6 +160,15 @@ Ventajas para la exposición:
 - Los guards leen el estado actual sin consultar el backend.
 - No se depende de `ChangeDetectorRef` para refrescar la vista.
 
+### 4.4 Flujo de reserva y disponibilidad
+
+- El catálogo filtra por rango de fechas y precio con `GET /api/servicios/buscar`.
+- Al abrir una suite se consulta `GET /api/servicios/{id}/ocupacion`.
+- `DateRangeCalendarComponent` bloquea días ocupados y valida que el rango no se cruce con otra reserva.
+- `ReservaWizardComponent` muestra el panel izquierdo con noches, subtotal y total, y simula la pasarela de pago.
+- La reserva se crea después de confirmar el pago simulado; el backend vuelve a validar el solapamiento para evitar condiciones de carrera.
+- La página `/nosotros` presenta la historia de la fundadora con imágenes locales estilo archivo familiar.
+
 ---
 
 ## 5. Navegación y rutas protegidas
@@ -168,6 +178,7 @@ Ventajas para la exposición:
 | Ruta | Componente | Guard | Acceso |
 |---|---|---|---|
 | `/` | `CatalogoComponent` | Ninguno | Público |
+| `/nosotros` | `NosotrosComponent` | Ninguno | Público |
 | `/login` | `LoginComponent` | `guestGuard` | Solo visitantes |
 | `/registro` | `RegistroComponent` | `guestGuard` | Solo visitantes |
 | `/mis-reservas` | `MisReservasComponent` | `authGuard` | Sesión activa |
@@ -757,10 +768,10 @@ H2 permite que el proyecto se ejecute sin instalar un motor de base de datos, id
 - Cookies `httpOnly` y refresh tokens.
 - Paginación y búsqueda avanzada.
 - Correos de confirmación.
-- Pasarela de pago.
+- Pasarela de pago real (la actual es una simulación académica).
 - Pruebas unitarias de componentes y servicios.
 - Migración a MySQL/PostgreSQL con migraciones Flyway.
-- Imágenes reales de las suites.
+- Reemplazar las ilustraciones SVG por fotografías definitivas del hotel.
 
 ---
 
