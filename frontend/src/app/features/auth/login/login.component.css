@@ -93,34 +93,6 @@
   color: var(--night);
 }
 
-.demo-box {
-  margin-top: 20px;
-  padding: 14px;
-  border: 1px dashed var(--stone);
-  border-radius: var(--radius);
-  background: #fbf9f4;
-}
-
-.demo-box p {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--ink-soft);
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.demo-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.demo-actions .btn {
-  flex: 1;
-  min-width: 120px;
-}
-
 .auth-switch {
   text-align: center;
   margin-top: 20px;

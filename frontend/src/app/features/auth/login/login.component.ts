@@ -63,15 +63,6 @@ export class LoginComponent {
     });
   }
 
-  usarCredenciales(tipo: 'admin' | 'cliente'): void {
-    if (tipo === 'admin') {
-      this.form.setValue({ email: 'admin@andessuites.com', password: 'admin123' });
-    } else {
-      this.form.setValue({ email: 'cliente@andessuites.com', password: 'cliente123' });
-    }
-    this.errorMsg.set('');
-  }
-
   alternarPassword(): void {
     this.mostrarPassword.update((visible) => !visible);
   }
